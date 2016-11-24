@@ -29,19 +29,30 @@
 
 package com.jackie.movies;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jackie.movies.base.BaseActivity;
+import com.jackie.movies.tools.HttpUtils;
 
-public class MovieActivity extends BaseActivity {
+import java.io.IOException;
+import java.util.Locale;
+
+public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBack {
+    private static final String TAG = "MovieActivity";
+
+    private boolean isPopular = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +76,25 @@ public class MovieActivity extends BaseActivity {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
                 LinearLayoutManager.VERTICAL, false);
         rec.setLayoutManager(layoutManager);
-        RecyclerView.Adapter adapter =
+
+        updateMovies();
+    }
+
+    private void updateMovies() {
+        Log.d(TAG, "updateMovies() called");
+
+        String baseUrl;
+        if (isPopular) {
+            baseUrl = Constants.MOVIE_POPULAR;
+        } else {
+            baseUrl = Constants.MOVIE_TOP_RATED;
+        }
+
+        Uri.Builder builder = Uri.parse(baseUrl).buildUpon();
+
+        builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
+        builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
+        HttpUtils.get(builder.build().toString(), this);
     }
 
     @Override
@@ -82,10 +111,36 @@ public class MovieActivity extends BaseActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_refresh:
+                updateMovies();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnect() {
+
+    }
+
+    @Override
+    public void onCanceled() {
+
+    }
+
+    @Override
+    public void onSuccess(String response) {
+        Log.d(TAG, "onSuccess() called with: string = [" + response + "]");
+        Gson gson = new GsonBuilder().create();
+        MovieEntity entity = gson.fromJson(response, MovieEntity.class);
+        if (entity != null) {
+            Log.d(TAG, "onSuccess: entity {" + entity.toString() + "}");
+        }
+    }
+
+    @Override
+    public void onFailure(IOException e) {
+
     }
 }

@@ -29,9 +29,6 @@
 
 package com.jackie.movies;
 
-import java.io.Serializable;
-import java.util.List;
-
 /**
  * Created 16/11/24.
  *
@@ -39,36 +36,29 @@ import java.util.List;
  * @version 1.0
  */
 
-public class MovieEntity implements Serializable{
+public class Constants {
+    private static final String SERVICE_API = App.getInstance().getString(R.string.api_service_url);
+    private static final String IMAGE_BASE_URI = App.getInstance().getString(R.string
+            .image_base_url);
 
-    private int page;
-    private int total_results;
-    private int total_pages;
-    private List<MovieDetail> results;
+    /**
+     * 高分电影
+     */
+    public static final String MOVIE_TOP_RATED = SERVICE_API + "movie/top_rated?";
 
-    public int getPage() { return page;}
+    /**
+     * 热门电影
+     */
+    public static final String MOVIE_POPULAR = SERVICE_API + "movie/popular?";
 
-    public void setPage(int page) { this.page = page;}
+    public static final String LANGUAGE_PARAM = "language";
 
-    public int getTotal_results() { return total_results;}
+    public static final String API_KEY_PARAM = "api_key";
 
-    public void setTotal_results(int total_results) { this.total_results = total_results;}
+    public static final String SMAL_IMAGE = IMAGE_BASE_URI + "w185/";
 
-    public int getTotal_pages() { return total_pages;}
+    public static final String MEDIUM_IMAGE = IMAGE_BASE_URI + "w500/";
 
-    public void setTotal_pages(int total_pages) { this.total_pages = total_pages;}
+    public static final String ORIGINAL_IMAGE = IMAGE_BASE_URI + "original/";
 
-    public List<MovieDetail> getResults() { return results;}
-
-    public void setResults(List<MovieDetail> results) { this.results = results;}
-
-    @Override
-    public String toString() {
-        return "MovieEntity{" +
-                "page=" + page +
-                ", total_results=" + total_results +
-                ", total_pages=" + total_pages +
-                ", results=" + results +
-                '}';
-    }
 }

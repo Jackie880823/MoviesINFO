@@ -27,10 +27,14 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.movies;
+package com.jackie.movies.tools;
 
-import java.io.Serializable;
-import java.util.List;
+import android.content.Context;
+import android.widget.ImageView;
+
+import com.jackie.movies.R;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 /**
  * Created 16/11/24.
@@ -39,36 +43,13 @@ import java.util.List;
  * @version 1.0
  */
 
-public class MovieEntity implements Serializable{
+public class ImageloadUtils {
+    public static void loadImage(Context context, String url, ImageView imageView) {
+        Picasso picasso = Picasso.with(context);
+        picasso.cancelRequest(imageView);
 
-    private int page;
-    private int total_results;
-    private int total_pages;
-    private List<MovieDetail> results;
-
-    public int getPage() { return page;}
-
-    public void setPage(int page) { this.page = page;}
-
-    public int getTotal_results() { return total_results;}
-
-    public void setTotal_results(int total_results) { this.total_results = total_results;}
-
-    public int getTotal_pages() { return total_pages;}
-
-    public void setTotal_pages(int total_pages) { this.total_pages = total_pages;}
-
-    public List<MovieDetail> getResults() { return results;}
-
-    public void setResults(List<MovieDetail> results) { this.results = results;}
-
-    @Override
-    public String toString() {
-        return "MovieEntity{" +
-                "page=" + page +
-                ", total_results=" + total_results +
-                ", total_pages=" + total_pages +
-                ", results=" + results +
-                '}';
+        RequestCreator creator = picasso.load(url);
+        creator.placeholder(R.drawable.image_default);
+        creator.into(imageView);
     }
 }
