@@ -59,6 +59,7 @@ dependencies {
     compile             dep.design
     compile             dep.okhttp
     compile             dep.picasso
+    compile             dep.gson
     androidTestCompile( dep.espresso, {
         exclude group:  dep.'com.android.support', module: 'support-annotations'
     })
