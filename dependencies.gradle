@@ -27,26 +27,23 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-apply from: rootProject.file('dependencies.gradle')
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+ext {
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.0"
+    applicationId = "com.jackie.movies"
+    minSdkVersion = 19
+    targetSdkVersion = 25
+    versionCode = 1
+    versionName = "1.0"
+    testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    dep = [
+            androidPlugin   : 'com.android.tools.build:gradle:2.2.2',
+            appcomaptV7     : 'com.android.support:appcompat-v7:25.0.1',
+            design          : 'com.android.support:design:25.0.1',
+            okhttp          : 'com.squareup.okhttp3:okhttp:3.4.2',
+            picasso         : 'com.squareup.picasso:picasso:2.5.2',
+            espresso        : 'com.android.support.test.espresso:espresso-core:2.2.2',
+            junit           : 'junit:junit:4.12',
+    ]
 }
