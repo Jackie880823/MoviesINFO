@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~
+  ~             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  ~             $                                                   $
+  ~             $                       _oo0oo_                     $
+  ~             $                      o8888888o                    $
+  ~             $                      88" . "88                    $
+  ~             $                      (| -_- |)                    $
+  ~             $                      0\  =  /0                    $
+  ~             $                    ___/`-_-'\___                  $
+  ~             $                  .' \\|     |$ '.                 $
+  ~             $                 / \\|||  :  |||$ \                $
+  ~             $                / _||||| -:- |||||- \              $
+  ~             $               |   | \\\  -  $/ |   |              $
+  ~             $               | \_|  ''\- -/''  |_/ |             $
+  ~             $               \  .-\__  '-'  ___/-. /             $
+  ~             $             ___'. .'  /-_._-\  `. .'___           $
+  ~             $          ."" '<  `.___\_<|>_/___.' >' "".         $
+  ~             $         | | :  `- \`.;`\ _ /`;.`/ - ` : | |       $
+  ~             $         \  \ `_.   \_ __\ /__ _/   .-` /  /       $
+  ~             $     =====`-.____`.___ \_____/___.-`___.-'=====    $
+  ~             $                       `=-_-='                     $
+  ~             $     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   $
+  ~             $                                                   $
+  ~             $          Buddha Bless         Never Bug           $
+  ~             $                                                   $
+  ~             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  -->
+
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.jackie.movies.MovieActivity">
+
+    <include layout="@layout/appbar_layout"/>
+
+    <include layout="@layout/content_movie"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@+id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@android:drawable/ic_dialog_email"/>
+
+</android.support.design.widget.CoordinatorLayout>

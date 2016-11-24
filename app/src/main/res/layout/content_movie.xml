@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~
+  ~             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  ~             $                                                   $
+  ~             $                       _oo0oo_                     $
+  ~             $                      o8888888o                    $
+  ~             $                      88" . "88                    $
+  ~             $                      (| -_- |)                    $
+  ~             $                      0\  =  /0                    $
+  ~             $                    ___/`-_-'\___                  $
+  ~             $                  .' \\|     |$ '.                 $
+  ~             $                 / \\|||  :  |||$ \                $
+  ~             $                / _||||| -:- |||||- \              $
+  ~             $               |   | \\\  -  $/ |   |              $
+  ~             $               | \_|  ''\- -/''  |_/ |             $
+  ~             $               \  .-\__  '-'  ___/-. /             $
+  ~             $             ___'. .'  /-_._-\  `. .'___           $
+  ~             $          ."" '<  `.___\_<|>_/___.' >' "".         $
+  ~             $         | | :  `- \`.;`\ _ /`;.`/ - ` : | |       $
+  ~             $         \  \ `_.   \_ __\ /__ _/   .-` /  /       $
+  ~             $     =====`-.____`.___ \_____/___.-`___.-'=====    $
+  ~             $                       `=-_-='                     $
+  ~             $     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   $
+  ~             $                                                   $
+  ~             $          Buddha Bless         Never Bug           $
+  ~             $                                                   $
+  ~             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  -->
+
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rec_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.jackie.movies.MovieActivity"
+    tools:showIn="@layout/activity_movie">
+
+</android.support.v7.widget.RecyclerView>
