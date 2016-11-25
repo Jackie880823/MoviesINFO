@@ -55,7 +55,7 @@ public class Constants {
 
     public static final String API_KEY_PARAM = "api_key";
 
-    public static final String SMAL_IMAGE = IMAGE_BASE_URI + "w185/";
+    public static final String SMALL_IMAGE = IMAGE_BASE_URI + "w342/";
 
     public static final String MEDIUM_IMAGE = IMAGE_BASE_URI + "w500/";
 
