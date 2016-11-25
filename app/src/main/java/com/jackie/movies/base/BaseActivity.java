@@ -29,9 +29,16 @@
 
 package com.jackie.movies.base;
 
+import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
+
+import com.jackie.movies.R;
 
 /**
  * Created 16/11/23.
@@ -40,9 +47,23 @@ import android.view.View;
  * @version 1.0
  */
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
+
+    protected ActionBar actionBar;
+
+    protected abstract @LayoutRes int getLayoutId();
 
     protected <V extends  View>V getViewById(@IdRes int id) {
         return (V) findViewById(id);
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(getLayoutId());
+        Toolbar toolbar = getViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        actionBar = getSupportActionBar();
     }
 }

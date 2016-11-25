@@ -33,7 +33,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,6 +48,7 @@ import java.util.Locale;
 public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBack {
     private static final String TAG = "MovieActivity";
 
+    private MenuItem menuForType;
     private boolean isPopular = true;
     private RecyclerView recyclerView;
     private Adapter mAdapter;
@@ -56,11 +56,6 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movie);
-
-        Toolbar toolbar = getViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
 
         recyclerView = getViewById(R.id.rec_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -84,12 +79,29 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
         builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
         HttpUtils.get(this, builder.build().toString(), this);
+
+        if (menuForType == null) {
+            return;
+        }
+
+        if (isPopular) {
+            menuForType.setTitle(R.string.action_popular_type);
+        } else {
+            menuForType.setTitle(R.string.action_top_rated_type);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_movie, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        menuForType = menu.findItem(R.id.action_type);
+        if (isPopular) {
+            menuForType.setTitle(R.string.action_popular_type);
+        } else {
+            menuForType.setTitle(R.string.action_top_rated_type);
+        }
         return true;
     }
 
@@ -102,6 +114,11 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
         switch (id) {
             case R.id.action_refresh:
+                updateMovies();
+                break;
+
+            case R.id.action_type:
+                isPopular = !isPopular;
                 updateMovies();
                 break;
         }
@@ -134,5 +151,10 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
     @Override
     public void onFailure(IOException e) {
 
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_movie;
     }
 }

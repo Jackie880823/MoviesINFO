@@ -29,38 +29,53 @@
 
 package com.jackie.movies;
 
-/**
- * Created 16/11/24.
- *
- * @author Jackie
- * @version 1.0
- */
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.view.View;
+import android.widget.TextView;
 
-public class Constants {
-    private static final String SERVICE_API = App.getInstance().getString(R.string.api_service_url);
-    private static final String IMAGE_BASE_URI = App.getInstance().getString(R.string
-            .image_base_url);
+import com.jackie.movies.base.BaseActivity;
 
-    /**
-     * 高分电影
-     */
-    public static final String MOVIE_TOP_RATED = SERVICE_API + "movie/top_rated?";
+public class DetailActivity extends BaseActivity implements View.OnClickListener{
 
-    /**
-     * 热门电影
-     */
-    public static final String MOVIE_POPULAR = SERVICE_API + "movie/popular?";
+    private TextView tvDescription;
 
-    public static final String LANGUAGE_PARAM = "language";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
-    public static final String API_KEY_PARAM = "api_key";
+        initView();
+    }
 
-    public static final String SMALL_IMAGE = IMAGE_BASE_URI + "w342";
+    private void initView() {
+        tvDescription = getViewById(R.id.tv_description);
 
-    public static final String MEDIUM_IMAGE = IMAGE_BASE_URI + "w500";
+        FloatingActionButton fab = getViewById(R.id.fab);
+        fab.setOnClickListener(this);
+    }
 
-    public static final String ORIGINAL_IMAGE = IMAGE_BASE_URI + "original";
 
-    public static final String EXTRA_MOVIE = "extra_movie";
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MovieDetail detail = (MovieDetail) getIntent().getSerializableExtra(Constants.EXTRA_MOVIE);
+        if (detail == null) {
+            finish();
+            return;
+        }
+        tvDescription.setText(detail.getOverview());
+    }
 
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_detail;
+    }
+
+    @Override
+    public void onClick(View view) {
+
+    }
 }

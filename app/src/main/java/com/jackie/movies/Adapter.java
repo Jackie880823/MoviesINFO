@@ -30,6 +30,8 @@
 package com.jackie.movies;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,18 +63,38 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
         return new Holder(view);
     }
 
-    protected class Holder extends ViewHolder<MovieDetail>{
+    protected static class Holder extends ViewHolder<MovieDetail> implements View.OnClickListener{
+        private static final String TAG = "Holder";
 
         private ImageView imgMovie;
+        private MovieDetail mDetail;
 
         public Holder(View itemView) {
             super(itemView);
             imgMovie = (ImageView) itemView.findViewById(R.id.img_movie);
+            imgMovie.setOnClickListener(this);
         }
 
         public void bindEntity(MovieDetail detail) {
-            String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
+            mDetail = detail;
+            String url = Constants.SMALL_IMAGE + detail.getPoster_path();
             ImageLoadUtil.loadImage(itemView.getContext(), url, imgMovie);
+        }
+
+        @Override
+        public void onClick(View view) {
+            int id = view.getId();
+            switch (id) {
+                case R.id.img_movie:
+                    Context context = view.getContext();
+                    Intent intent = new Intent(context, DetailActivity.class);
+                    intent.putExtra(Constants.EXTRA_MOVIE, mDetail);
+                    context.startActivity(intent);
+                    break;
+                default:
+                    Log.d(TAG, "onClick: id [ " + id + " ] not action");
+                    return;
+            }
         }
     }
 }

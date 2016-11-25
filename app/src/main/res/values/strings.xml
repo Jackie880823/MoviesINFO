@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Movies INFO</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_top_rated_type">Top Rated</string>
+    <string name="action_popular_type">Popular</string>
     <string name="action_refresh">Refresh</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_detail">Film Details</string>
 </resources>
