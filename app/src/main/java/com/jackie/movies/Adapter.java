@@ -29,8 +29,11 @@
 
 package com.jackie.movies;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,7 +80,7 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
 
         public void bindEntity(MovieDetail detail) {
             mDetail = detail;
-            String url = Constants.SMALL_IMAGE + detail.getPoster_path();
+            String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
             ImageLoadUtil.loadImage(itemView.getContext(), url, imgMovie);
         }
 
@@ -86,15 +89,22 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
             int id = view.getId();
             switch (id) {
                 case R.id.img_movie:
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, DetailActivity.class);
-                    intent.putExtra(Constants.EXTRA_MOVIE, mDetail);
-                    context.startActivity(intent);
+                    startDetailActivity(view);
                     break;
                 default:
                     Log.d(TAG, "onClick: id [ " + id + " ] not action");
                     return;
             }
+        }
+
+        private void startDetailActivity(View view) {
+            Activity context = (Activity) view.getContext();
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra(Constants.EXTRA_MOVIE, mDetail);
+            ActivityOptionsCompat optionsCompat = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(context, view, Constants.TRANSIT_PIC);
+            ActivityCompat.startActivity(context, intent, optionsCompat.toBundle());
+//            context.startActivity(intent);
         }
     }
 }

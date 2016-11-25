@@ -127,7 +127,9 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
     @Override
     public void onConnect() {
-
+        if (mAdapter != null) {
+            mAdapter.setData(null);
+        }
     }
 
     @Override

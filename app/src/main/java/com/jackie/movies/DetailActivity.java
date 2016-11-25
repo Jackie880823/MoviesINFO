@@ -31,14 +31,19 @@ package com.jackie.movies;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.ViewCompat;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jackie.movies.base.BaseActivity;
+import com.jackie.movies.tools.ImageLoadUtil;
 
 public class DetailActivity extends BaseActivity implements View.OnClickListener{
 
     private TextView tvDescription;
+    private MovieDetail detail;
+    private ImageView imgPoster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,26 +52,41 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        initData();
         initView();
     }
 
     private void initView() {
         tvDescription = getViewById(R.id.tv_description);
+        imgPoster = getViewById(R.id.img_poster);
+        ViewCompat.setTransitionName(imgPoster, Constants.TRANSIT_PIC);
+
+        String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
+        ImageLoadUtil.loadImage(this, url, imgPoster);
 
         FloatingActionButton fab = getViewById(R.id.fab);
         fab.setOnClickListener(this);
+    }
+
+    private void initData() {
+        detail = (MovieDetail) getIntent().getSerializableExtra(Constants.EXTRA_MOVIE);
+        if (detail == null) {
+            finish();
+            return;
+        }
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        MovieDetail detail = (MovieDetail) getIntent().getSerializableExtra(Constants.EXTRA_MOVIE);
-        if (detail == null) {
-            finish();
+        tvDescription.setText(detail.getOverview());
+
+        if (actionBar == null) {
             return;
         }
-        tvDescription.setText(detail.getOverview());
+
+        actionBar.setTitle(detail.getTitle());
     }
 
     @Override
@@ -76,6 +96,12 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-
+        int id = view.getId();
+        switch (id) {
+            case R.id.fab:
+                break;
+            default:
+                break;
+        }
     }
 }

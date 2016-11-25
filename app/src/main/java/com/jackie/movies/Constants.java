@@ -63,4 +63,7 @@ public class Constants {
 
     public static final String EXTRA_MOVIE = "extra_movie";
 
+
+    public static final String TRANSIT_PIC = "picture";
+
 }
