@@ -31,15 +31,12 @@ package com.jackie.movies;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -52,7 +49,9 @@ import java.util.Locale;
 public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBack {
     private static final String TAG = "MovieActivity";
 
-    private boolean isPopular = false;
+    private boolean isPopular = true;
+    private RecyclerView recyclerView;
+    private Adapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,20 +61,10 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         Toolbar toolbar = getViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
-
-        RecyclerView rec = getViewById(R.id.rec_view);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.VERTICAL, false);
-        rec.setLayoutManager(layoutManager);
+        recyclerView = getViewById(R.id.rec_view);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(layoutManager);
 
         updateMovies();
     }
@@ -94,7 +83,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
         builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
         builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
-        HttpUtils.get(builder.build().toString(), this);
+        HttpUtils.get(this, builder.build().toString(), this);
     }
 
     @Override
@@ -136,6 +125,9 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         MovieEntity entity = gson.fromJson(response, MovieEntity.class);
         if (entity != null) {
             Log.d(TAG, "onSuccess: entity {" + entity.toString() + "}");
+            mAdapter = new Adapter(this, entity.getResults());
+            recyclerView.setAdapter(mAdapter);
+            Log.d(TAG, "run: " + mAdapter.getItemCount());
         }
     }
 

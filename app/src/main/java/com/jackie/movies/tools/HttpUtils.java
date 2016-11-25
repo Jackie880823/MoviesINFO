@@ -29,6 +29,8 @@
 
 package com.jackie.movies.tools;
 
+import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -61,30 +63,47 @@ public class HttpUtils {
         return builder;
     }
 
-    public static void get(String url, HttpCallBack callBack) {
+    public static void get(Context context, String url, HttpCallBack callBack) {
         Log.d(TAG, "get() called with: url = [" + url + "]");
 
         Request.Builder builder = initBuilder(url);
         final Request request = builder.get().build();
-        client.newCall(request).enqueue(new CallListener(callBack));
+        client.newCall(request).enqueue(new CallListener(context, callBack));
     }
 
     private static class CallListener implements Callback {
         private static final String TAG = "CallListener";
-        private HttpCallBack callBack;
+        private Context mContext;
+        private HttpCallBack mCallBack;
 
-        public CallListener(HttpCallBack callBack) {
-            this.callBack = callBack;
-            callBack.onConnect();
+        public CallListener(Context context, HttpCallBack callBack) {
+            this.mContext = context;
+            mCallBack = callBack;
+            if (context instanceof Activity) {
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallBack.onConnect();
+                    }
+                });
+            }
         }
 
         @Override
-        public void onFailure(Call call, IOException e) {
+        public void onFailure(final Call call, final IOException e) {
             Log.e(TAG, "onFailure: [ message = " + e.getLocalizedMessage() + " ]", e);
-            if (call.isCanceled()) {
-                callBack.onCanceled();
-            } else {
-                callBack.onFailure(e);
+
+            if (mContext instanceof Activity) {
+                ((Activity) mContext).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (call.isCanceled()) {
+                            mCallBack.onCanceled();
+                        } else {
+                            mCallBack.onFailure(e);
+                        }
+                    }
+                });
             }
         }
 
@@ -96,11 +115,25 @@ public class HttpUtils {
                 call.enqueue(this);
             } else if (response.isSuccessful()) {
                 ResponseBody body = response.body();
-                String string = body.string();
+                final String string = body.string();
                 Log.d(TAG, "onResponse: body " + string);
-                callBack.onSuccess(string);
+                if (mContext instanceof Activity) {
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCallBack.onSuccess(string);
+                        }
+                    });
+                }
             } else {
-                callBack.onCanceled();
+                if (mContext instanceof Activity) {
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCallBack.onCanceled();
+                        }
+                    });
+                }
             }
         }
     }
