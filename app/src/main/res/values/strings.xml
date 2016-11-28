@@ -4,4 +4,7 @@
     <string name="action_popular_type">Popular</string>
     <string name="action_refresh">Refresh</string>
     <string name="title_activity_detail">Film Details</string>
+    <string name="film_title">Title:</string>
+    <string name="film_release_date">Release Date:</string>
+    <string name="film_popularity">Popularity:</string>
 </resources>

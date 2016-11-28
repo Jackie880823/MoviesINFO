@@ -53,7 +53,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
-                android:id="@+id/img_poster"
+                android:id="@+id/img_backdrop"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
@@ -78,7 +78,19 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_dialog_email"/>
+        app:layout_anchorGravity="bottom|end"/>
+
+    <TextView
+        android:id="@+id/tv_vote_average"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="16dp"
+        android:gravity="center"
+        android:text="9.9"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:elevation="16dp"
+        app:layout_anchor="@id/fab"
+        app:layout_anchorGravity="center"/>
 
 </android.support.design.widget.CoordinatorLayout>
