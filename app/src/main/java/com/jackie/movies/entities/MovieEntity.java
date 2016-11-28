@@ -27,7 +27,7 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.movies;
+package com.jackie.movies.entities;
 
 import java.io.Serializable;
 import java.util.List;

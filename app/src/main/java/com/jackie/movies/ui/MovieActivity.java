@@ -27,7 +27,7 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.movies;
+package com.jackie.movies.ui;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +39,10 @@ import android.view.MenuItem;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jackie.movies.Adapter;
+import com.jackie.movies.Constants;
+import com.jackie.movies.entities.MovieEntity;
+import com.jackie.movies.R;
 import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.tools.HttpUtils;
 

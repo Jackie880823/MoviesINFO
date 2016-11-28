@@ -42,7 +42,9 @@ import android.widget.ImageView;
 
 import com.jackie.movies.base.BaseRecyclerAdapter;
 import com.jackie.movies.base.ViewHolder;
+import com.jackie.movies.entities.MovieDetail;
 import com.jackie.movies.tools.ImageLoadUtil;
+import com.jackie.movies.ui.DetailActivity;
 
 import java.util.List;
 

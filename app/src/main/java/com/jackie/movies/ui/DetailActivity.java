@@ -27,7 +27,7 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.movies;
+package com.jackie.movies.ui;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -37,6 +37,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jackie.movies.Constants;
+import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.R;
 import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.tools.ImageLoadUtil;
 
