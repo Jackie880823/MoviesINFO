@@ -32,6 +32,7 @@ package com.jackie.movies;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,7 +41,7 @@ import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.tools.ImageLoadUtil;
 
 public class DetailActivity extends BaseActivity implements View.OnClickListener{
-
+    private static final String TAG = "DetailActivity";
     private TextView tvDescription;
     private MovieDetail detail;
     private ImageView imgPoster;
@@ -87,6 +88,17 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         }
 
         actionBar.setTitle(detail.getTitle());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        switch (itemId) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

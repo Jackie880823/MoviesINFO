@@ -50,15 +50,17 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
     private MenuItem menuForType;
     private boolean isPopular = true;
+    private int currentPage = 1;
     private RecyclerView recyclerView;
     private Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         recyclerView = getViewById(R.id.rec_view);
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
+        layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
 
         updateMovies();
@@ -77,6 +79,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         Uri.Builder builder = Uri.parse(baseUrl).buildUpon();
 
         builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
+        builder.appendQueryParameter(Constants.PAGE_PARAM, String.valueOf(currentPage));
         builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
         HttpUtils.get(this, builder.build().toString(), this);
 

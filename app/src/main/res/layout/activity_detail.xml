@@ -55,9 +55,9 @@
             <ImageView
                 android:id="@+id/img_poster"
                 android:layout_width="match_parent"
-                android:scaleType="centerCrop"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
+                android:scaleType="centerCrop"
                 app:layout_collapseMode="parallax"/>
 
             <android.support.v7.widget.Toolbar
