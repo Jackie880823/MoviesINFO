@@ -103,8 +103,8 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
 
         String backdropUrl = Constants.MEDIUM_IMAGE + detail.getBackdrop_path();
         String posterUrl = Constants.MEDIUM_IMAGE + detail.getPoster_path();
-        ImageLoadUtil.loadImage(this, backdropUrl, imgBackdrop);
-        ImageLoadUtil.loadImage(this, posterUrl, imgPoster);
+        ImageLoadUtil.loadBackDropImage(this, backdropUrl, imgBackdrop);
+        ImageLoadUtil.loadPosterImage(this, posterUrl, imgPoster);
 
         FloatingActionButton fab = getViewById(R.id.fab);
         fab.setOnClickListener(this);

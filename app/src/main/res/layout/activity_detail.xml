@@ -58,6 +58,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
                 android:scaleType="centerCrop"
+                android:src="@drawable/image_backdrop"
                 app:layout_collapseMode="parallax"/>
 
             <android.support.v7.widget.Toolbar

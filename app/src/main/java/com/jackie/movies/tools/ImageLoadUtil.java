@@ -46,13 +46,22 @@ import com.squareup.picasso.RequestCreator;
 
 public class ImageLoadUtil {
     private static final String TAG = "ImageLoadUtil";
-    public static void loadImage(Context context, String url, ImageView imageView) {
-        Log.d(TAG, "loadImage() called with: url = [" + url + "]");
+    public static void loadPosterImage(Context context, String url, ImageView imageView) {
+        Log.d(TAG, "loadPosterImage() called with: url = [" + url + "]");
         Picasso picasso = Picasso.with(context);
         picasso.cancelRequest(imageView);
 
         RequestCreator creator = picasso.load(url);
         creator.placeholder(R.drawable.image_default);
+        creator.into(imageView);
+    }
+    public static void loadBackDropImage(Context context, String url, ImageView imageView) {
+        Log.d(TAG, "loadPosterImage() called with: url = [" + url + "]");
+        Picasso picasso = Picasso.with(context);
+        picasso.cancelRequest(imageView);
+
+        RequestCreator creator = picasso.load(url);
+        creator.placeholder(R.drawable.image_backdrop);
         creator.into(imageView);
     }
 }

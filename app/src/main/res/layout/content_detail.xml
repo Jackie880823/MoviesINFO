@@ -59,6 +59,7 @@
                     android:id="@+id/img_poster"
                     android:layout_width="150dp"
                     android:layout_height="225dp"
+                    android:src="@drawable/image_default"
                     android:scaleType="fitXY"/>
 
                 <TableLayout

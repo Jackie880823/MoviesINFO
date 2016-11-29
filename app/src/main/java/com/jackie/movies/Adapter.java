@@ -83,7 +83,7 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
         public void bindEntity(MovieDetail detail) {
             mDetail = detail;
             String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
-            ImageLoadUtil.loadImage(itemView.getContext(), url, imgMovie);
+            ImageLoadUtil.loadPosterImage(itemView.getContext(), url, imgMovie);
         }
 
         @Override
