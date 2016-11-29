@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~
   ~             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -28,12 +29,14 @@
   -->
 
 <resources>
-    <dimen name="app_bar_height">240dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
-    <dimen name="text_margin">8dp</dimen>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="movie_detail_top_margin">32dp</dimen>
-    <dimen name="small_padding">4dp</dimen>
+    <string name="app_name">电影信息</string>
+    <string name="action_popular_type">热门</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_top_rated_type">高分</string>
+    <string name="film_popularity">人气：</string>
+    <string name="film_release_date">上映日期：</string>
+    <string name="film_title">电影名称：</string>
+    <string name="title_activity_detail">影片详情</string>
+    <string name="title_popular_movies">高人气电影</string>
+    <string name="title_top_rated_movies">高评分电影</string>
 </resources>
