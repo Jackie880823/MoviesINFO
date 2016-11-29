@@ -101,7 +101,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         tvPopularity.setText(String.valueOf(detail.getPopularity()));
         tvVoteCount.setText(String.valueOf(detail.getVote_count()));
 
-        String backdropUrl = Constants.ORIGINAL_IMAGE + detail.getBackdrop_path();
+        String backdropUrl = Constants.MEDIUM_IMAGE + detail.getBackdrop_path();
         String posterUrl = Constants.MEDIUM_IMAGE + detail.getPoster_path();
         ImageLoadUtil.loadImage(this, backdropUrl, imgBackdrop);
         ImageLoadUtil.loadImage(this, posterUrl, imgPoster);
