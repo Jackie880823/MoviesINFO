@@ -29,8 +29,10 @@
 
 package com.jackie.movies.ui;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -51,6 +53,7 @@ import java.util.Locale;
 
 public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBack {
     private static final String TAG = "MovieActivity";
+    public static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
 
     private MenuItem menuForType;
     private boolean isPopular = true;
@@ -58,6 +61,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
     private RecyclerView recyclerView;
     private Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,8 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
         updateMovies();
     }
 
@@ -126,6 +132,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
             case R.id.action_type:
                 isPopular = !isPopular;
+                preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
                 updateMovies();
                 break;
         }
