@@ -63,6 +63,27 @@ public class MovieEntity implements Serializable{
     public void setResults(List<MovieDetail> results) { this.results = results;}
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MovieEntity)) return false;
+
+        MovieEntity that = (MovieEntity) o;
+
+        if (getPage() != that.getPage()) return false;
+        if (getTotal_results() != that.getTotal_results()) return false;
+        return getTotal_pages() == that.getTotal_pages();
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getPage();
+        result = 31 * result + getTotal_results();
+        result = 31 * result + getTotal_pages();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "MovieEntity{" +
                 "page=" + page +

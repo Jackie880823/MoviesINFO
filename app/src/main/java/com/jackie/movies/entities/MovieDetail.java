@@ -31,6 +31,7 @@ package com.jackie.movies.entities;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created 16/11/24.
@@ -118,20 +119,13 @@ public class MovieDetail implements Serializable{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MovieDetail)) return false;
-
         MovieDetail that = (MovieDetail) o;
-
-        if (getId() != that.getId()) return false;
-        return getGenre_ids() != null ? getGenre_ids().equals(that.getGenre_ids()) : that
-                .getGenre_ids() == null;
-
+        return getId() == that.getId() && Objects.equals(getGenre_ids(), that.getGenre_ids());
     }
 
     @Override
     public int hashCode() {
-        int result = getId();
-        result = 31 * result + (getGenre_ids() != null ? getGenre_ids().hashCode() : 0);
-        return result;
+        return Objects.hash(getId(), getGenre_ids());
     }
 
     @Override
