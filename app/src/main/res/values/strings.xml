@@ -7,4 +7,7 @@
     <string name="film_title">Title:</string>
     <string name="film_release_date">Release Date:</string>
     <string name="film_popularity">Popularity:</string>
+    <string name="txt_page_description" formatted="false" translatable="false">%1d/%2d</string>
+    <string name="title_popular_movies">Most Popular Movies</string>
+    <string name="title_top_rated_movies">Top Rated Movies</string>
 </resources>
