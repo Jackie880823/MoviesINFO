@@ -30,6 +30,7 @@
 package com.jackie.movies.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
@@ -69,6 +70,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void initView() {
+        AppBarLayout appBarLayout = getViewById(R.id.app_bar);
         tvDescription = getViewById(R.id.tv_description);
         tvVoteAverage = getViewById(R.id.tv_vote_average);
         imgBackdrop = getViewById(R.id.img_backdrop);
@@ -78,6 +80,20 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         tvPopularity = getViewById(R.id.tv_popularity);
         tvVoteCount = getViewById(R.id.tv_vote_count);
         ViewCompat.setTransitionName(imgPoster, Constants.TRANSIT_PIC);
+
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            private int lastOffset = 0;
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                Log.d(TAG, "onOffsetChanged() called with: verticalOffset = [" + verticalOffset + "]");
+                if (lastOffset == verticalOffset && verticalOffset != 0) {
+                    tvVoteAverage.setVisibility(View.GONE);
+                } else {
+                    tvVoteAverage.setVisibility(View.VISIBLE);
+                }
+                lastOffset = verticalOffset;
+            }
+        });
     }
 
     private void initData() {
