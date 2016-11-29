@@ -236,16 +236,18 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
     @Override
     public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        tvPage.setVisibility(View.GONE);
+
         boolean result = false;
         if (motionEvent == null || motionEvent1 == null) {
             return false;
         }
 
-            float diffY = motionEvent1.getY() - motionEvent.getY();
+        float diffY = motionEvent1.getY() - motionEvent.getY();
         float diffX = motionEvent1.getX() - motionEvent.getX();
         if (Math.abs(diffX) > Math.abs(diffY)) {
             if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(v) > SWIPE_VELOCITY_THRESHOLD) {
-                if (diffX > 0 ) {
+                if (diffX > 0) {
                     Log.d(TAG, "onFling: onSwipeRight()");
                     if (entity != null && currentPage > 1) {
                         currentPage -= 1;
