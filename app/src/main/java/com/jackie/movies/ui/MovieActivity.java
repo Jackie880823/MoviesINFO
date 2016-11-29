@@ -162,6 +162,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
             case R.id.action_type:
                 isPopular = !isPopular;
+                currentPage = 1;
                 preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
                 updateMovies();
                 break;
