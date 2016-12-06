@@ -97,7 +97,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void initData() {
-        detail = (MovieDetail) getIntent().getSerializableExtra(Constants.EXTRA_MOVIE);
+        detail = getIntent().getParcelableExtra(Constants.EXTRA_MOVIE);
         if (detail == null) {
             finish();
             return;

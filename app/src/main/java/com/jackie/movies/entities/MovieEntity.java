@@ -29,7 +29,9 @@
 
 package com.jackie.movies.entities;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ import java.util.List;
  * @version 1.0
  */
 
-public class MovieEntity implements Serializable{
+public class MovieEntity implements Parcelable {
 
     private int page;
     private int total_results;
@@ -92,4 +94,33 @@ public class MovieEntity implements Serializable{
                 ", results=" + results +
                 '}';
     }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.page);
+        dest.writeInt(this.total_results);
+        dest.writeInt(this.total_pages);
+        dest.writeTypedList(this.results);
+    }
+
+    public MovieEntity() {}
+
+    protected MovieEntity(Parcel in) {
+        this.page = in.readInt();
+        this.total_results = in.readInt();
+        this.total_pages = in.readInt();
+        this.results = in.createTypedArrayList(MovieDetail.CREATOR);
+    }
+
+    public static final Parcelable.Creator<MovieEntity> CREATOR = new Parcelable
+            .Creator<MovieEntity>() {
+        @Override
+        public MovieEntity createFromParcel(Parcel source) {return new MovieEntity(source);}
+
+        @Override
+        public MovieEntity[] newArray(int size) {return new MovieEntity[size];}
+    };
 }

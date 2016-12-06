@@ -29,7 +29,10 @@
 
 package com.jackie.movies.entities;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,7 +43,7 @@ import java.util.Objects;
  * @version 1.0
  */
 
-public class MovieDetail implements Serializable{
+public class MovieDetail implements Parcelable {
 
     private String poster_path;
     private boolean adult;
@@ -147,4 +150,53 @@ public class MovieDetail implements Serializable{
                 ", genre_ids=" + genre_ids +
                 '}';
     }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.poster_path);
+        dest.writeByte(this.adult ? (byte) 1 : (byte) 0);
+        dest.writeString(this.overview);
+        dest.writeString(this.release_date);
+        dest.writeInt(this.id);
+        dest.writeString(this.original_title);
+        dest.writeString(this.original_language);
+        dest.writeString(this.title);
+        dest.writeString(this.backdrop_path);
+        dest.writeDouble(this.popularity);
+        dest.writeInt(this.vote_count);
+        dest.writeByte(this.video ? (byte) 1 : (byte) 0);
+        dest.writeDouble(this.vote_average);
+        dest.writeList(this.genre_ids);
+    }
+
+    public MovieDetail() {}
+
+    protected MovieDetail(Parcel in) {
+        this.poster_path = in.readString();
+        this.adult = in.readByte() != 0;
+        this.overview = in.readString();
+        this.release_date = in.readString();
+        this.id = in.readInt();
+        this.original_title = in.readString();
+        this.original_language = in.readString();
+        this.title = in.readString();
+        this.backdrop_path = in.readString();
+        this.popularity = in.readDouble();
+        this.vote_count = in.readInt();
+        this.video = in.readByte() != 0;
+        this.vote_average = in.readDouble();
+        this.genre_ids = new ArrayList<Integer>();
+        in.readList(this.genre_ids, Integer.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<MovieDetail> CREATOR = new Parcelable.Creator<MovieDetail>() {
+        @Override
+        public MovieDetail createFromParcel(Parcel source) {return new MovieDetail(source);}
+
+        @Override
+        public MovieDetail[] newArray(int size) {return new MovieDetail[size];}
+    };
 }
