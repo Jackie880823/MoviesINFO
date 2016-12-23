@@ -151,9 +151,14 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
         Cursor cursor = contentResolver.query(uri, null, null, null, null, null);
         assertEquals("query failure", cursor.getCount(), 1);
 
-        uri = MovieContract.Page.buildPageUri(1);
+        uri = MovieContract.Page.buildPageUri(0b101);
         cursor = contentResolver.query(uri, null, null, null, null, null);
         assertEquals("query failure", cursor.getCount(), 1);
+
+        uri = MovieContract.Movie.CONTENT_URI.buildUpon().appendPath(MovieContract.Movie
+                .PATH_POPULAR).appendPath(String.valueOf(1)).build();
+        cursor = contentResolver.query(uri, null, null, null, null, null);
+        assertEquals("query failure", cursor.getCount(), 20);
 
     }
 }

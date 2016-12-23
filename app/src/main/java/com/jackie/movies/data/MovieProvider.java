@@ -68,18 +68,45 @@ public class MovieProvider extends ContentProvider {
     // Creates a UriMatcher object.
     private static final UriMatcher mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+    /**
+     * 匹配页的多项
+     */
     private static final int PAGES = 0;
+    /**
+     * 匹配指定页
+     */
     private static final int PAGE = 1;
-
+    /**
+     * 匹配多项电影数据
+     */
     private static final int MOVIES = 2;
+    /**
+     * 指定电影数据
+     */
     private static final int MOVIE = 3;
+    /**
+     * 热闹电影
+     */
+    private static final int POPULAR = 4;
+    /**
+     * 高分电影
+     */
+    private static final int TOP_RATED = 5;
 
     static {
         mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Page.TABLE_NAME, PAGES);
+        // 具体的页，后接 page_type
         mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Page.TABLE_NAME + "/#", PAGE);
         mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME, MOVIES);
+        // 具体的电影数据，后面接 movie_id
         mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/#",
                 MOVIE);
+        // 热门电影，后接page
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/" +
+                MovieContract.Movie.PATH_POPULAR + "/#", POPULAR);
+        // 高分电影，后接page
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/" +
+                MovieContract.Movie.PATH_TOP_RATED + "/#", TOP_RATED);
     }
 
     private MovieDatabaseHelper mDatabaseHelper;
@@ -95,6 +122,7 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         String AND = " AND ";
+        String equal = "=";
         if (TextUtils.isEmpty(selection)) {
             selection = MovieContract.LANGUAGE_CODE + " = ? ";
         } else {
@@ -120,7 +148,7 @@ public class MovieProvider extends ContentProvider {
             case PAGE: {
                 tableName = MovieContract.Page.TABLE_NAME;
                 long pageType = MovieContract.Page.getPageType(uri);
-                selection = selection + AND + MovieContract.Page.PAGE_TYPE + " = " + pageType + " ";
+                selection = selection + AND + MovieContract.Page.PAGE_TYPE + equal + pageType + " ";
                 break;
             }
 
@@ -131,15 +159,53 @@ public class MovieProvider extends ContentProvider {
             case MOVIE:
                 tableName = MovieContract.Movie.TABLE_NAME;
                 long movieId = MovieContract.Movie.getMovieId(uri);
-                selection = selection + AND + MovieContract.Movie.MOVIE_ID + " = " + movieId +
-                        " ";
+                selection = selection + AND + MovieContract.Movie.MOVIE_ID + equal + movieId + " ";
                 break;
+
+            case POPULAR: {
+                tableName = MovieContract.Movie.TABLE_NAME;
+                int page = (int) MovieContract.getLongForUri(uri);
+                long pageType = (page << 2) + 0b1;
+                long pageId = getPageId(db, pageType);
+                selection = selection + AND + MovieContract.Movie.PAGE_ID + equal + pageId + " ";
+                break;
+            }
+
+            case TOP_RATED: {
+                tableName = MovieContract.Movie.TABLE_NAME;
+                int page = (int) MovieContract.getLongForUri(uri);
+                long pageType = (page << 2) + 0b10;
+                long pageId = getPageId(db, pageType);
+                selection = selection + AND + MovieContract.Movie.PAGE_ID + equal + pageId + " ";
+                break;
+            }
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         result = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
         return result;
+    }
+
+    private long getPageId(SQLiteDatabase db, long pageType) {
+        String AND = " AND ";
+        String equal = "=";
+        Cursor cursor = db.query(MovieContract.Page.TABLE_NAME,
+            new String[]{MovieContract.Page._ID},
+            MovieContract.Page.PAGE_TYPE
+                    + equal
+                    + pageType
+                    + AND
+                    + MovieContract.LANGUAGE_CODE
+                    + "=? "
+            , new String[]{Locale.getDefault().getLanguage()}, null, null, null);
+        long pageId = -1;
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            pageId = cursor.getLong(cursor.getColumnIndex(MovieContract.Page._ID));
+        }
+        cursor.close();
+        return pageId;
     }
 
     @Nullable
@@ -154,6 +220,8 @@ public class MovieProvider extends ContentProvider {
                 type = MovieContract.Page.CONTENT_ITEM_TYPE;
                 break;
             case MOVIES:
+            case POPULAR:
+            case TOP_RATED:
                 type = MovieContract.Movie.CONTENT_TYPE;
                 break;
             case MOVIE:

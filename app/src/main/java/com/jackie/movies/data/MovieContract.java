@@ -64,6 +64,7 @@ public class MovieContract {
     public static final String PATH_PAGE = "Page";
     public static final String PATH_MOVIE = "Movie";
 
+
     public static final String LANGUAGE_CODE = "language_code";
 
     static long getLongForUri(Uri uri){
@@ -94,6 +95,8 @@ public class MovieContract {
 
     public static final class Movie implements BaseColumns {
         public static final String TABLE_NAME = PATH_MOVIE;
+        public static final String PATH_POPULAR = "popular";
+        public static final String PATH_TOP_RATED = "top_rated";
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME)
                 .build();
