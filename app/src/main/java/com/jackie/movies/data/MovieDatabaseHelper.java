@@ -65,30 +65,24 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String SQL_CREATE_LANGUAGE = "CREATE TABLE "
-                + MovieContract.Language.TABLE_NAME + "("
-                + MovieContract.Language._ID        + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + MovieContract.Language.CODE       + " TEXT UNIQUE NOT NULL "
-                + ");";
 
         final String SQL_CREATE_PAGE = "CREATE TABLE "
                 + MovieContract.Page.TABLE_NAME + "("
                 + MovieContract.Page._ID            + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + MovieContract.Page.LANGUAGE_ID    + " integer not null, "
-                + MovieContract.Page.PAGE           + " integer not null, "
-                + MovieContract.Page.TOTAL_RESULTS  + " integer not null, "
-                + MovieContract.Page.TOTAL_PAGES    + " integer not null, "
-                + " FOREIGN KEY ("
-                + MovieContract.Page.LANGUAGE_ID    + ") REFERENCES "
-                + MovieContract.Language.TABLE_NAME + "("
-                + MovieContract.Language._ID        + ")"
-                + ");";
+                + MovieContract.LANGUAGE_CODE       + " TEXT NOT NULL, "
+                + MovieContract.Page.PAGE_TYPE      + " INTEGER NOT NULL, "
+                + MovieContract.Page.TOTAL_RESULTS  + " INTEGER NOT NULL, "
+                + MovieContract.Page.TOTAL_PAGES    + " INTEGER NOT NULL, "
+                + "UNIQUE ("
+                + MovieContract.LANGUAGE_CODE       + ", "
+                + MovieContract.Page.PAGE_TYPE
+                + ") ON CONFLICT REPLACE);";
 
         final String SQL_CREATE_MOVIE = "CREATE TABLE "
                 + MovieContract.Movie.TABLE_NAME        + "("
                 + MovieContract.Movie._ID               + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + MovieContract.Movie.LANGUAGE_ID       + " INTEGER NOT NULL, "
-                + MovieContract.Movie.PAGE_TYPE         + " INTEGER NOT NULL, "
+                + MovieContract.LANGUAGE_CODE           + " TEXT NOT NULL, "
+                + MovieContract.Movie.PAGE_ID           + " INTEGER NOT NULL, "
                 + MovieContract.Movie.MOVIE_ID          + " INTEGER NOT NULL, "
                 + MovieContract.Movie.POSTER_PATH       + " TEXT NOT NULL, "
                 + MovieContract.Movie.ADULT             + " NUMERIC NOT NULL, "
@@ -103,16 +97,13 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
                 + MovieContract.Movie.VOTE_COUNT        + " INTEGER, "
                 + MovieContract.Movie.VIDEO             + " NUMERIC NOT NULL, "
                 + MovieContract.Movie.VOTE_AVERAGE      + " REAL, "
-                + " FOREIGN KEY ("
-                + MovieContract.Movie.LANGUAGE_ID       + ") REFERENCES "
-                + MovieContract.Language.TABLE_NAME     + "("
-                + MovieContract.Language._ID            + "),"
+                + " FOREIGN KEY (" + MovieContract.Movie.PAGE_ID + ") REFERENCES "
+                + MovieContract.Page.TABLE_NAME + " (" + MovieContract.Page._ID + "), "
                 + "UNIQUE ("
-                + MovieContract.Movie.LANGUAGE_ID       + ", "
+                + MovieContract.LANGUAGE_CODE + ", "
                 + MovieContract.Movie.MOVIE_ID
                 + ") ON CONFLICT REPLACE);";
 
-        db.execSQL(SQL_CREATE_LANGUAGE);
         db.execSQL(SQL_CREATE_PAGE);
         db.execSQL(SQL_CREATE_MOVIE);
     }
@@ -121,7 +112,6 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + MovieContract.Movie.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + MovieContract.Page.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + MovieContract.Language.TABLE_NAME);
         onCreate(db);
     }
 }

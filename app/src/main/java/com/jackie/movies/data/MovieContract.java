@@ -42,8 +42,12 @@
 
 package com.jackie.movies.data;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
+
+import java.util.List;
 
 /**
  * Created 16/12/22.
@@ -53,29 +57,53 @@ import android.provider.BaseColumns;
  */
 
 public class MovieContract {
-    private static final String CONTENT_AUTHORITY = "com.jackie.movies";
+    public static final String CONTENT_AUTHORITY = "com.jackie.movies";
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_LANGUAGE = "path_language";
+    public static final String PATH_PAGE = "Page";
+    public static final String PATH_MOVIE = "Movie";
 
-    public final class Language implements BaseColumns {
-        public static final String TABLE_NAME = "Language";
-        public static final String CODE = "code";
+    public static final String LANGUAGE_CODE = "language_code";
+
+    static long getLongForUri(Uri uri){
+        List<String> pathSegments = uri.getPathSegments();
+        return Long.parseLong(pathSegments.get(pathSegments.size() - 1));
     }
 
-    public final class Page implements BaseColumns {
-        public static final String TABLE_NAME = "Page";
-        public static final String LANGUAGE_ID = "language_id";
-        public static final String PAGE = "page";
+    public static final class Page implements BaseColumns {
+        public static final String TABLE_NAME = PATH_PAGE;
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME)
+                .build();
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" +
+                CONTENT_AUTHORITY + "." + TABLE_NAME;
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" +
+                CONTENT_AUTHORITY + "." + TABLE_NAME;
+        public static final String PAGE_TYPE = "page_type";
         public static final String TOTAL_RESULTS = "total_results";
         public static final String TOTAL_PAGES = "total_pages";
+
+        static Uri buildPageUri(long pageType) {
+            return ContentUris.withAppendedId(CONTENT_URI, pageType);
+        }
+
+        static long getPageType(Uri uri) {
+            return getLongForUri(uri);
+        }
     }
 
-    public final class Movie implements BaseColumns {
-        public static final String TABLE_NAME = "Movie";
-        public static final String LANGUAGE_ID = "language_id";
-        public static final String PAGE_TYPE = "page_type";
+    public static final class Movie implements BaseColumns {
+        public static final String TABLE_NAME = PATH_MOVIE;
+
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(TABLE_NAME)
+                .build();
+
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" +
+                CONTENT_AUTHORITY + "." + TABLE_NAME;
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" +
+                CONTENT_AUTHORITY + "." + TABLE_NAME;
+
+        public static final String PAGE_ID = "page_id";
         public static final String POSTER_PATH = "poster_path";
         public static final String ADULT = "adult";
         public static final String OVERVIEW = "overview";
@@ -90,5 +118,13 @@ public class MovieContract {
         public static final String VOTE_COUNT = "vote_count";
         public static final String VIDEO = "video";
         public static final String VOTE_AVERAGE = "vote_average";
+
+        static Uri buildIDUri(long _id) {
+           return ContentUris.withAppendedId(CONTENT_URI, _id);
+        }
+
+        static long getMovieId(Uri uri) {
+            return getLongForUri(uri);
+        }
     }
 }
