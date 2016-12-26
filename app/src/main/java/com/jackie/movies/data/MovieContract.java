@@ -80,6 +80,9 @@ public class MovieContract {
                 CONTENT_AUTHORITY + "." + TABLE_NAME;
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" +
                 CONTENT_AUTHORITY + "." + TABLE_NAME;
+        /**
+         *
+         */
         public static final String PAGE_TYPE = "page_type";
         public static final String TOTAL_RESULTS = "total_results";
         public static final String TOTAL_PAGES = "total_pages";
@@ -122,10 +125,19 @@ public class MovieContract {
         public static final String VIDEO = "video";
         public static final String VOTE_AVERAGE = "vote_average";
 
-        static Uri buildIDUri(long _id) {
-           return ContentUris.withAppendedId(CONTENT_URI, _id);
+        /**
+         * 确定movieId的电影
+         * @param movieId
+         * @return
+         */
+        static Uri buildMovieUri(long movieId) {
+           return ContentUris.withAppendedId(CONTENT_URI, movieId);
         }
 
+        /**
+         * @param uri
+         * @return
+         */
         static long getMovieId(Uri uri) {
             return getLongForUri(uri);
         }

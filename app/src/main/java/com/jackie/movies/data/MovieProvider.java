@@ -48,11 +48,14 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
-import java.util.Arrays;
-import java.util.List;
+import com.jackie.movies.data.MovieContract.Movie;
+import com.jackie.movies.data.MovieContract.Page;
+
 import java.util.Locale;
 
 /**
@@ -93,20 +96,26 @@ public class MovieProvider extends ContentProvider {
      */
     private static final int TOP_RATED = 5;
 
+    /**
+     * 拼接{@link Page#PAGE_TYPE}二进制前两位的的值
+     */
+    public static final int TYPE_POPULAR = 0b0001;
+    public static final int TYPE_TOP_RATED = 0b0010;
+
     static {
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Page.TABLE_NAME, PAGES);
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Page.TABLE_NAME, PAGES);
         // 具体的页，后接 page_type
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Page.TABLE_NAME + "/#", PAGE);
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME, MOVIES);
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Page.TABLE_NAME + "/#", PAGE);
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Movie.TABLE_NAME, MOVIES);
         // 具体的电影数据，后面接 movie_id
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/#",
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Movie.TABLE_NAME + "/#",
                 MOVIE);
         // 热门电影，后接page
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/" +
-                MovieContract.Movie.PATH_POPULAR + "/#", POPULAR);
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Movie.TABLE_NAME + "/" +
+                Movie.PATH_POPULAR + "/#", POPULAR);
         // 高分电影，后接page
-        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.Movie.TABLE_NAME + "/" +
-                MovieContract.Movie.PATH_TOP_RATED + "/#", TOP_RATED);
+        mMatcher.addURI(MovieContract.CONTENT_AUTHORITY, Movie.TABLE_NAME + "/" +
+                Movie.PATH_TOP_RATED + "/#", TOP_RATED);
     }
 
     private MovieDatabaseHelper mDatabaseHelper;
@@ -119,22 +128,15 @@ public class MovieProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         String AND = " AND ";
         String equal = "=";
+        String language = Locale.getDefault().getLanguage();
         if (TextUtils.isEmpty(selection)) {
-            selection = MovieContract.LANGUAGE_CODE + " = ? ";
+            selection = MovieContract.LANGUAGE_CODE + " = '" + language + "'";
         } else {
-            selection = selection + AND + MovieContract.LANGUAGE_CODE + " = ? ";
-        }
-
-        if (selectionArgs != null && selectionArgs.length > 0) {
-            List<String> strings = Arrays.asList(selection);
-            strings.add(Locale.getDefault().getLanguage());
-            selectionArgs = (String[]) strings.toArray();
-        } else {
-            selectionArgs = new String[]{Locale.getDefault().getLanguage()};
+            selection = selection + AND + MovieContract.LANGUAGE_CODE + " = '" + language + "'";
         }
 
         Cursor result;
@@ -142,41 +144,47 @@ public class MovieProvider extends ContentProvider {
         String tableName;
         switch (mMatcher.match(uri)) {
             case PAGES:
-                tableName = MovieContract.Page.TABLE_NAME;
+                tableName = Page.TABLE_NAME;
                 break;
 
             case PAGE: {
-                tableName = MovieContract.Page.TABLE_NAME;
-                long pageType = MovieContract.Page.getPageType(uri);
-                selection = selection + AND + MovieContract.Page.PAGE_TYPE + equal + pageType + " ";
+                tableName = Page.TABLE_NAME;
+                long pageType = Page.getPageType(uri);
+                selection = selection + AND + Page.PAGE_TYPE + equal + pageType + " ";
                 break;
             }
 
             case MOVIES:
-                tableName = MovieContract.Movie.TABLE_NAME;
+                tableName = Movie.TABLE_NAME;
                 break;
 
             case MOVIE:
-                tableName = MovieContract.Movie.TABLE_NAME;
-                long movieId = MovieContract.Movie.getMovieId(uri);
-                selection = selection + AND + MovieContract.Movie.MOVIE_ID + equal + movieId + " ";
+                tableName = Movie.TABLE_NAME;
+                long movieId = Movie.getMovieId(uri);
+                selection = selection + AND + Movie.MOVIE_ID + equal + movieId + " ";
                 break;
 
             case POPULAR: {
-                tableName = MovieContract.Movie.TABLE_NAME;
+                tableName = Movie.TABLE_NAME;
                 int page = (int) MovieContract.getLongForUri(uri);
-                long pageType = (page << 2) + 0b1;
-                long pageId = getPageId(db, pageType);
-                selection = selection + AND + MovieContract.Movie.PAGE_ID + equal + pageId + " ";
+                long pageType = (page << 2) + TYPE_POPULAR;
+                Log.d(TAG, "query: pageType is " + pageType);
+                String selectPage = Page.PAGE_TYPE + equal + pageType;
+                long pageId = getPageId(selectPage, null);
+                Log.d(TAG, "query: pageId is " + pageId);
+                selection = selection + AND + Movie.PAGE_ID + equal + pageId + " ";
                 break;
             }
 
             case TOP_RATED: {
-                tableName = MovieContract.Movie.TABLE_NAME;
+                tableName = Movie.TABLE_NAME;
                 int page = (int) MovieContract.getLongForUri(uri);
-                long pageType = (page << 2) + 0b10;
-                long pageId = getPageId(db, pageType);
-                selection = selection + AND + MovieContract.Movie.PAGE_ID + equal + pageId + " ";
+                long pageType = (page << 2) + TYPE_TOP_RATED;
+                Log.d(TAG, "query: pageType is " + pageType);
+                String selectPage = Page.PAGE_TYPE + equal + pageType;
+                long pageId = getPageId(selectPage, null);
+                Log.d(TAG, "query: pageId is " + pageId);
+                selection = selection + AND + Movie.PAGE_ID + equal + pageId + " ";
                 break;
             }
 
@@ -187,45 +195,37 @@ public class MovieProvider extends ContentProvider {
         return result;
     }
 
-    private long getPageId(SQLiteDatabase db, long pageType) {
-        String AND = " AND ";
-        String equal = "=";
-        Cursor cursor = db.query(MovieContract.Page.TABLE_NAME,
-            new String[]{MovieContract.Page._ID},
-            MovieContract.Page.PAGE_TYPE
-                    + equal
-                    + pageType
-                    + AND
-                    + MovieContract.LANGUAGE_CODE
-                    + "=? "
-            , new String[]{Locale.getDefault().getLanguage()}, null, null, null);
+    private long getPageId(String select, String[] selectArg) {
+        Cursor cursor = query(Page.CONTENT_URI, new
+                String[]{Page._ID}, select,
+                selectArg, null);
         long pageId = -1;
-        if (cursor.getCount()>0) {
+        if (cursor != null && cursor.getCount()>0) {
             cursor.moveToFirst();
-            pageId = cursor.getLong(cursor.getColumnIndex(MovieContract.Page._ID));
+            pageId = cursor.getLong(cursor.getColumnIndex(Page._ID));
+            cursor.close();
         }
-        cursor.close();
         return pageId;
     }
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         String type;
         switch (mMatcher.match(uri)) {
             case PAGES:
-                type = MovieContract.Page.CONTENT_TYPE;
+                type = Page.CONTENT_TYPE;
                 break;
             case PAGE:
-                type = MovieContract.Page.CONTENT_ITEM_TYPE;
+                type = Page.CONTENT_ITEM_TYPE;
                 break;
             case MOVIES:
             case POPULAR:
             case TOP_RATED:
-                type = MovieContract.Movie.CONTENT_TYPE;
+                type = Movie.CONTENT_TYPE;
                 break;
             case MOVIE:
-                type = MovieContract.Movie.CONTENT_ITEM_TYPE;
+                type = Movie.CONTENT_ITEM_TYPE;
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -235,26 +235,23 @@ public class MovieProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
+        if (!values.containsKey(MovieContract.LANGUAGE_CODE)) {
+            values.put(MovieContract.LANGUAGE_CODE, Locale.getDefault().getLanguage());
+        }
+
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
-        long _id;
         Uri insertedUri;
         switch (mMatcher.match(uri)) {
             case MOVIES:
-                _id = db.insert(MovieContract.Movie.TABLE_NAME, null, values);
-                if (_id > 0) {
-                    insertedUri = MovieContract.Movie.buildIDUri(_id);
-                } else {
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
-                }
+                db.insert(Movie.TABLE_NAME, null, values);
+                Long movieId = values.getAsLong(Movie.MOVIE_ID);
+                insertedUri = Movie.buildMovieUri(movieId);
                 break;
             case PAGES:
-                _id = db.insert(MovieContract.Page.TABLE_NAME, null, values);
-                if (_id > 0) {
-                    insertedUri = MovieContract.Page.buildPageUri(_id);
-                } else {
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
-                }
+                db.insert(Page.TABLE_NAME, null, values);
+                Long pageType = values.getAsLong(Page.PAGE_TYPE);
+                insertedUri = Page.buildPageUri(pageType);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -264,12 +261,78 @@ public class MovieProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+        String AND = " AND ";
+        String language = Locale.getDefault().getLanguage();
+        if (TextUtils.isEmpty(selection)) {
+            selection = MovieContract.LANGUAGE_CODE + " = '" + language + "'";
+        } else {
+            selection = selection + AND + MovieContract.LANGUAGE_CODE + " = '" + language + "'";
+        }
+
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        String tableName;
+        switch (mMatcher.match(uri)) {
+            case PAGES:
+                tableName = Page.TABLE_NAME;
+                break;
+            case MOVIES:
+                tableName = Movie.TABLE_NAME;
+                break;
+
+            case PAGE:
+                tableName = Page.TABLE_NAME;
+                long pageType = Page.getPageType(uri);
+                selection = selection + AND + Page.PAGE_TYPE + "=" + pageType;
+                break;
+
+            case MOVIE:
+                tableName = Movie.TABLE_NAME;
+                long movieId = Movie.getMovieId(uri);
+                selection = selection + AND + Movie.MOVIE_ID + "=" + movieId;
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri:" + uri);
+        }
+        return db.delete(tableName, selection, selectionArgs);
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        String AND = " AND ";
+        String language = Locale.getDefault().getLanguage();
+        if (TextUtils.isEmpty(selection)) {
+            selection = MovieContract.LANGUAGE_CODE + " = '" + language + "'";
+        } else {
+            selection = selection + AND + MovieContract.LANGUAGE_CODE + " = '" + language + "'";
+        }
+
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        String tableName;
+        switch (mMatcher.match(uri)) {
+            case PAGES:
+                tableName = Page.TABLE_NAME;
+                break;
+            case MOVIES:
+                tableName = Movie.TABLE_NAME;
+                break;
+
+            case PAGE:
+                tableName = Page.TABLE_NAME;
+                long pageType = Page.getPageType(uri);
+                selection = selection + AND + Page.PAGE_TYPE + "=" + pageType;
+                break;
+
+            case MOVIE:
+                tableName = Movie.TABLE_NAME;
+                long movieId = Movie.getMovieId(uri);
+                selection = selection + AND + Movie.MOVIE_ID + "=" + movieId;
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri:" + uri);
+        }
+        return db.update(tableName, values, selection, selectionArgs);
     }
 }

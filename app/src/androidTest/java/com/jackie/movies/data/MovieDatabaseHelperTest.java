@@ -42,11 +42,8 @@
 
 package com.jackie.movies.data;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -87,7 +84,8 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
         MovieEntity entity = gson.fromJson(response, MovieEntity.class);
         assertTrue("the json is null", entity != null);
         deleteDatabase();
-        ContentResolver contentResolver = mContext.getContentResolver();
+        SQLiteDatabase db = new MovieDatabaseHelper(mContext).getWritableDatabase();
+        assertEquals(true, db.isOpen());
 
         String languageCode = Locale.getDefault().getLanguage();
 
@@ -97,9 +95,8 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
         pageValues.put(MovieContract.Page.PAGE_TYPE, (page << 2) + 1);
         pageValues.put(MovieContract.Page.TOTAL_RESULTS, entity.getTotal_results());
         pageValues.put(MovieContract.Page.TOTAL_PAGES, entity.getTotal_pages());
-        Uri insert = contentResolver.insert(MovieContract.Page.CONTENT_URI, pageValues);
-        long pageId = MovieContract.getLongForUri(insert);
-        assertNotNull("not insert page to database", insert);
+        long pageId = db.insert(MovieContract.Page.TABLE_NAME, null, pageValues);
+        assertTrue("not insert page to database", pageId > -1);
 
         for (MovieDetail detail : entity.getResults()) {
             List<Integer> genre_ids = detail.getGenre_ids();
@@ -129,36 +126,7 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
             movieValues.put(MovieContract.Movie.VOTE_COUNT,         detail.getVote_count());
             movieValues.put(MovieContract.Movie.VIDEO,              detail.isVideo());
             movieValues.put(MovieContract.Movie.VOTE_AVERAGE,       detail.getVote_average());
-
-            insert = contentResolver.insert(MovieContract.Movie.CONTENT_URI, movieValues);
-
-            assertNotNull("not insert page to database", insert);
+            db.insert(MovieContract.Movie.TABLE_NAME, null, movieValues);
         }
-    }
-
-    public void testGetType() {
-        ContentResolver contentResolver = mContext.getContentResolver();
-        String type = contentResolver.getType(MovieContract.Movie.CONTENT_URI);
-        assertEquals("get the type is: " + type, MovieContract.Movie.CONTENT_TYPE, type);
-
-        type = contentResolver.getType(MovieContract.Page.CONTENT_URI);
-        assertEquals("get the type is: " + type, MovieContract.Page.CONTENT_TYPE, type);
-    }
-
-    public void testQuery() {
-        ContentResolver contentResolver = mContext.getContentResolver();
-        Uri uri = MovieContract.Movie.buildIDUri(127380);
-        Cursor cursor = contentResolver.query(uri, null, null, null, null, null);
-        assertEquals("query failure", cursor.getCount(), 1);
-
-        uri = MovieContract.Page.buildPageUri(0b101);
-        cursor = contentResolver.query(uri, null, null, null, null, null);
-        assertEquals("query failure", cursor.getCount(), 1);
-
-        uri = MovieContract.Movie.CONTENT_URI.buildUpon().appendPath(MovieContract.Movie
-                .PATH_POPULAR).appendPath(String.valueOf(1)).build();
-        cursor = contentResolver.query(uri, null, null, null, null, null);
-        assertEquals("query failure", cursor.getCount(), 20);
-
     }
 }
