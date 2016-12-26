@@ -56,7 +56,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class MovieDatabaseHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     protected static final String DATABASE_NAME = "movie.db";
 
     public MovieDatabaseHelper(Context context) {
@@ -97,6 +97,7 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
                 + MovieContract.Movie.VOTE_COUNT        + " INTEGER, "
                 + MovieContract.Movie.VIDEO             + " NUMERIC NOT NULL, "
                 + MovieContract.Movie.VOTE_AVERAGE      + " REAL, "
+                + MovieContract.Movie.FAVOUR             + " NUMERIC DEFAULT 0, "
                 + " FOREIGN KEY (" + MovieContract.Movie.PAGE_ID + ") REFERENCES "
                 + MovieContract.Page.TABLE_NAME + " (" + MovieContract.Page._ID + "), "
                 + "UNIQUE ("

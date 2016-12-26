@@ -124,6 +124,7 @@ public class MovieContract {
         public static final String VOTE_COUNT = "vote_count";
         public static final String VIDEO = "video";
         public static final String VOTE_AVERAGE = "vote_average";
+        public static final String FAVOUR = "favour";
 
         /**
          * 确定movieId的电影
