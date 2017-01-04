@@ -42,7 +42,7 @@
   -->
 
 <resources>
-    <string name="json">
+    <string name="json" translatable="false">
         "{
             \"page\": 1,
             \"results\": [
