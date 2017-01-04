@@ -53,4 +53,6 @@
     <string name="txt_page_description" formatted="false" translatable="false">%1d/%2d</string>
     <string name="title_popular_movies">Most Popular Movies</string>
     <string name="title_top_rated_movies">Top Rated Movies</string>
+    <string name="img_desc_movie_backdrop">movie backdrop</string>
+    <string name="img_desc_movie_poster">movie poster</string>
 </resources>
