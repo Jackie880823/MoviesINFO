@@ -109,7 +109,8 @@ public class MovieContract {
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" +
                 CONTENT_AUTHORITY + "." + TABLE_NAME;
 
-        public static final String PAGE_ID = "page_id";
+
+        public static final String PAGE_TYPE = "page_type";
         public static final String POSTER_PATH = "poster_path";
         public static final String ADULT = "adult";
         public static final String OVERVIEW = "overview";

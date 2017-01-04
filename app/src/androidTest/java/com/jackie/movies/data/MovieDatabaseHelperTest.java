@@ -90,11 +90,13 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
         String languageCode = Locale.getDefault().getLanguage();
 
         int page = entity.getPage();
+        int pageType = (page << 2) + 1;
         ContentValues pageValues = new ContentValues();
-        pageValues.put(MovieContract.LANGUAGE_CODE, languageCode);
-        pageValues.put(MovieContract.Page.PAGE_TYPE, (page << 2) + 1);
-        pageValues.put(MovieContract.Page.TOTAL_RESULTS, entity.getTotal_results());
-        pageValues.put(MovieContract.Page.TOTAL_PAGES, entity.getTotal_pages());
+        pageValues.put(MovieContract.LANGUAGE_CODE,             languageCode);
+        pageValues.put(MovieContract.Page.PAGE_TYPE,            pageType);
+        pageValues.put(MovieContract.Page.TOTAL_RESULTS,        entity.getTotal_results());
+        pageValues.put(MovieContract.Page.TOTAL_PAGES,          entity.getTotal_pages());
+
         long pageId = db.insert(MovieContract.Page.TABLE_NAME, null, pageValues);
         assertTrue("not insert page to database", pageId > -1);
 
@@ -111,7 +113,7 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
 
             ContentValues movieValues = new ContentValues();
             movieValues.put(MovieContract.LANGUAGE_CODE,            languageCode)  ;
-            movieValues.put(MovieContract.Movie.PAGE_ID,            pageId);
+            movieValues.put(MovieContract.Movie.PAGE_TYPE,          pageType);
             movieValues.put(MovieContract.Movie.POSTER_PATH,        detail.getPoster_path());
             movieValues.put(MovieContract.Movie.ADULT,              detail.isAdult());
             movieValues.put(MovieContract.Movie.OVERVIEW,           detail.getOverview());

@@ -56,7 +56,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class MovieDatabaseHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     protected static final String DATABASE_NAME = "movie.db";
 
     public MovieDatabaseHelper(Context context) {
@@ -82,7 +82,7 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
                 + MovieContract.Movie.TABLE_NAME        + "("
                 + MovieContract.Movie._ID               + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + MovieContract.LANGUAGE_CODE           + " TEXT NOT NULL, "
-                + MovieContract.Movie.PAGE_ID           + " INTEGER NOT NULL, "
+                + MovieContract.Movie.PAGE_TYPE         + " INTEGER NOT NULL, "
                 + MovieContract.Movie.MOVIE_ID          + " INTEGER NOT NULL, "
                 + MovieContract.Movie.POSTER_PATH       + " TEXT NOT NULL, "
                 + MovieContract.Movie.ADULT             + " NUMERIC NOT NULL, "
@@ -97,11 +97,11 @@ public class MovieDatabaseHelper extends SQLiteOpenHelper {
                 + MovieContract.Movie.VOTE_COUNT        + " INTEGER, "
                 + MovieContract.Movie.VIDEO             + " NUMERIC NOT NULL, "
                 + MovieContract.Movie.VOTE_AVERAGE      + " REAL, "
-                + MovieContract.Movie.FAVOUR             + " NUMERIC DEFAULT 0, "
-                + " FOREIGN KEY (" + MovieContract.Movie.PAGE_ID + ") REFERENCES "
-                + MovieContract.Page.TABLE_NAME + " (" + MovieContract.Page._ID + "), "
+                + MovieContract.Movie.FAVOUR            + " NUMERIC DEFAULT 0, "
+                + " FOREIGN KEY (" + MovieContract.Movie.PAGE_TYPE + ") REFERENCES "
+                + MovieContract.Page.TABLE_NAME + " (" + MovieContract.Page.PAGE_TYPE + "), "
                 + "UNIQUE ("
-                + MovieContract.LANGUAGE_CODE + ", "
+                + MovieContract.LANGUAGE_CODE           + ", "
                 + MovieContract.Movie.MOVIE_ID
                 + ") ON CONFLICT REPLACE);";
 

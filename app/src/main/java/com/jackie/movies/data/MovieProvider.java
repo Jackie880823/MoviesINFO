@@ -169,10 +169,7 @@ public class MovieProvider extends ContentProvider {
                 int page = (int) MovieContract.getLongForUri(uri);
                 long pageType = (page << 2) + TYPE_POPULAR;
                 Log.d(TAG, "query: pageType is " + pageType);
-                String selectPage = Page.PAGE_TYPE + equal + pageType;
-                long pageId = getPageId(selectPage, null);
-                Log.d(TAG, "query: pageId is " + pageId);
-                selection = selection + AND + Movie.PAGE_ID + equal + pageId + " ";
+                selection = selection + AND + Movie.PAGE_TYPE + equal + pageType + " ";
                 break;
             }
 
@@ -181,10 +178,7 @@ public class MovieProvider extends ContentProvider {
                 int page = (int) MovieContract.getLongForUri(uri);
                 long pageType = (page << 2) + TYPE_TOP_RATED;
                 Log.d(TAG, "query: pageType is " + pageType);
-                String selectPage = Page.PAGE_TYPE + equal + pageType;
-                long pageId = getPageId(selectPage, null);
-                Log.d(TAG, "query: pageId is " + pageId);
-                selection = selection + AND + Movie.PAGE_ID + equal + pageId + " ";
+                selection = selection + AND + Movie.PAGE_TYPE + equal + pageType + " ";
                 break;
             }
 
@@ -193,19 +187,6 @@ public class MovieProvider extends ContentProvider {
         }
         result = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
         return result;
-    }
-
-    private long getPageId(String select, String[] selectArg) {
-        Cursor cursor = query(Page.CONTENT_URI, new
-                String[]{Page._ID}, select,
-                selectArg, null);
-        long pageId = -1;
-        if (cursor != null && cursor.getCount()>0) {
-            cursor.moveToFirst();
-            pageId = cursor.getLong(cursor.getColumnIndex(Page._ID));
-            cursor.close();
-        }
-        return pageId;
     }
 
     @Nullable
