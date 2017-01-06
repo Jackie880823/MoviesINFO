@@ -43,11 +43,16 @@
 package com.jackie.movies.ui;
 
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -56,25 +61,27 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.jackie.movies.Adapter;
-import com.jackie.movies.Constants;
 import com.jackie.movies.R;
+import com.jackie.movies.UpdateMoviesTask;
 import com.jackie.movies.base.BaseActivity;
+import com.jackie.movies.data.MovieContract.Movie;
+import com.jackie.movies.data.MovieContract.Page;
+import com.jackie.movies.entities.MovieDetail;
 import com.jackie.movies.entities.MovieEntity;
-import com.jackie.movies.tools.HttpUtils;
 
-import java.io.IOException;
-import java.util.Locale;
+import java.util.LinkedList;
+import java.util.List;
 
-public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBack,
-        GestureDetector.OnGestureListener {
+public class MovieActivity extends BaseActivity implements GestureDetector.OnGestureListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "MovieActivity";
     public static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
 
     private static final int SWIPE_THRESHOLD = 100;
     private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+    private static final int MOVIE_LOADER_ID = 0x3e8;
+    private static final int MOVIE_FAVORITE_ID = 0x3e9;
 
     private MenuItem menuForType;
     private boolean isPopular = true;
@@ -86,10 +93,12 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
     private SharedPreferences preferences;
     private MovieEntity entity;
     private GestureDetector detector;
+    private LoaderManager loaderManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        loaderManager = getSupportLoaderManager();
 
         detector = new GestureDetector(this, this);
 
@@ -99,10 +108,6 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
-            private float curX = 0.0f;
-            private float curY = 0.0f;
-            private float lastX = 0.0f;
-            private float lastY = 0.0f;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -113,38 +118,21 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+        loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+        loaderManager.initLoader(MOVIE_FAVORITE_ID, null, this);
         updateMovies();
     }
 
     private void updateMovies() {
         Log.d(TAG, "updateMovies() called");
+
+        getSupportLoaderManager().destroyLoader(MOVIE_LOADER_ID);
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
         tvPage.setVisibility(View.GONE);
 
-        String baseUrl;
-        if (isPopular) {
-            baseUrl = Constants.MOVIE_POPULAR;
-            setTitle(getString(R.string.title_popular_movies));
-        } else {
-            baseUrl = Constants.MOVIE_TOP_RATED;
-            setTitle(getString(R.string.title_top_rated_movies));
-        }
-
-        Uri.Builder builder = Uri.parse(baseUrl).buildUpon();
-
-        builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
-        builder.appendQueryParameter(Constants.PAGE_PARAM, String.valueOf(currentPage));
-        builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
-        HttpUtils.get(this, builder.build().toString(), this);
-
-        if (menuForType == null) {
-            return;
-        }
-
-        if (isPopular) {
-            menuForType.setTitle(R.string.action_top_rated_type);
-        } else {
-            menuForType.setTitle(R.string.action_popular_type);
-        }
+        String[] param = new String[]{String.valueOf(isPopular), String.valueOf(currentPage)};
+        UpdateMoviesTask task = new UpdateMoviesTask(this);
+        task.execute(param);
     }
 
     @Override
@@ -153,11 +141,7 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         menuForType = menu.findItem(R.id.action_type);
-        if (isPopular) {
-            menuForType.setTitle(R.string.action_top_rated_type);
-        } else {
-            menuForType.setTitle(R.string.action_popular_type);
-        }
+        setMenuTitle(isPopular);
         return true;
     }
 
@@ -175,31 +159,35 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
 
             case R.id.action_type:
                 isPopular = !isPopular;
+
+                setMenuTitle(isPopular);
+
                 currentPage = 1;
                 preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
-                updateMovies();
+                loaderManager.destroyLoader(MOVIE_LOADER_ID);
+                loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                break;
+
+            case R.id.action_favorite:
+                loaderManager.destroyLoader(MOVIE_FAVORITE_ID);
+                loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onConnect() {
-        if (mAdapter != null) {
-            mAdapter.setData(null);
+    private void setMenuTitle(boolean isPopular) {
+        if (isPopular) {
+            menuForType.setTitle(R.string.action_top_rated_type);
+            setTitle(R.string.title_popular_movies);
+        } else {
+            setTitle(R.string.title_top_rated_movies);
+            menuForType.setTitle(R.string.action_popular_type);
         }
     }
 
-    @Override
-    public void onCanceled() {
-
-    }
-
-    @Override
-    public void onSuccess(String response) {
-        Log.d(TAG, "onSuccess() called with: string = [" + response + "]");
-        Gson gson = new GsonBuilder().create();
-        entity = gson.fromJson(response, MovieEntity.class);
+    public void onSuccess(MovieEntity entity) {
+        Log.d(TAG, "onSuccess() called with: string = [" + entity + "]");
         if (entity != null) {
             Log.d(TAG, "onSuccess: entity {" + entity.toString() + "}");
             mAdapter = new Adapter(this, entity.getResults());
@@ -210,11 +198,6 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
                     currentPage, entity.getTotal_pages());
             tvPage.setText(description);
         }
-    }
-
-    @Override
-    public void onFailure(IOException e) {
-
     }
 
     @Override
@@ -286,5 +269,125 @@ public class MovieActivity extends BaseActivity implements HttpUtils.HttpCallBac
             result = true;
         }
         return result;
+    }
+
+    /**
+     * @param id
+     * @param args
+     * @return
+     */
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "onCreateLoader() called with: id = [" + id + "], args = [" + args + "]");
+
+        Uri uri;
+        String select;
+        switch (id) {
+            case MOVIE_FAVORITE_ID:
+                uri = Movie.CONTENT_URI;
+                select = Movie.FAVOUR + " = 1";
+                break;
+            case MOVIE_LOADER_ID:
+                String path = isPopular ? Movie.PATH_POPULAR : Movie.PATH_TOP_RATED;
+                uri = Movie.CONTENT_URI.buildUpon().appendPath(path).appendPath(String.valueOf
+                        (currentPage)).build();
+                select = null;
+                break;
+
+            default:
+                return null;
+        }
+        return new CursorLoader(this, uri, null, select, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null || data.getCount() < 0) {
+            return;
+        }
+
+        entity = new MovieEntity();
+        List<MovieDetail> details = new LinkedList<>();
+        final int columnTotalResults = data.getColumnIndex(Page.TOTAL_RESULTS);
+        final int columnPosterPath = data.getColumnIndex(Movie.POSTER_PATH);
+        final int columnAdult = data.getColumnIndex(Movie.ADULT);
+        final int columnOverview = data.getColumnIndex(Movie.OVERVIEW);
+        final int columnReleaseDate = data.getColumnIndex(Movie.RELEASE_DATE);
+        final int columnId = data.getColumnIndex(Movie.MOVIE_ID);
+        final int columnOriginalTitle = data.getColumnIndex(Movie.ORIGINAL_TITLE);
+        final int columnOriginalLanguage = data.getColumnIndex(Movie.ORIGINAL_LANGUAGE);
+        final int columnTitle = data.getColumnIndex(Movie.TITLE);
+        final int columnBackdropPath = data.getColumnIndex(Movie.BACKDROP_PATH);
+        final int columnPopularity = data.getColumnIndex(Movie.POPULARITY);
+        final int columnVoteCount = data.getColumnIndex(Movie.VOTE_COUNT);
+        final int columnVideo = data.getColumnIndex(Movie.VIDEO);
+        final int columnVoteAverage = data.getColumnIndex(Movie.VOTE_AVERAGE);
+        final int columnGenreIds = data.getColumnIndex(Movie.GENRE_IDS);
+
+
+        boolean hasPage = columnTotalResults > -1;
+        Log.d(TAG, "onLoadFinished: hasPage is " + hasPage);
+        while (data.moveToNext()) {
+            if (hasPage && entity.getTotal_pages() == -1) {
+                int columnPageType = data.getColumnIndex(Page.PAGE_TYPE);
+                int columnTotalPages = data.getColumnIndex(Page.TOTAL_PAGES);
+
+                entity.setPage(data.getInt(columnPageType) >> 2);
+                entity.setTotal_pages(data.getInt(columnTotalPages));
+                entity.setTotal_results(data.getInt(columnTotalResults));
+            }
+            MovieDetail detail = new MovieDetail();
+            //        String poster_path;
+            detail.setPoster_path(data.getString(columnPosterPath));
+            //        boolean adult;
+            detail.setAdult(data.getInt(columnAdult) == 1);
+            //        String overview;
+            detail.setOverview(data.getString(columnOverview));
+            //        String release_date;
+            detail.setRelease_date(data.getString(columnReleaseDate));
+            //        long id;
+            detail.setId(data.getLong(columnId));
+            //        String original_title;
+            detail.setOriginal_title(data.getString(columnOriginalTitle));
+            //        String original_language;
+            detail.setOriginal_language(data.getString(columnOriginalLanguage));
+            //        String title;
+            detail.setTitle(data.getString(columnTitle));
+            //        String backdrop_path;
+            detail.setBackdrop_path(data.getString(columnBackdropPath));
+            //        double popularity;
+            detail.setPopularity(data.getDouble(columnPopularity));
+            //        int vote_count;
+            detail.setVote_count(data.getInt(columnVoteCount));
+            //        boolean video;
+            detail.setVideo(data.getInt(columnVideo) == 1);
+            //        double vote_average;
+            detail.setVote_average(data.getDouble(columnVoteAverage));
+            //        List<Integer> genre_ids;
+            String[] split = data.getString(columnGenreIds).split(",");
+            List<Integer> ids = new LinkedList<>();
+            for (String s : split) {
+                if (TextUtils.isEmpty(s)) {
+                    continue;
+                }
+                ids.add(Integer.valueOf(s));
+            }
+            detail.setGenre_ids(ids);
+            details.add(detail);
+        }
+
+        if (details.isEmpty()) {
+            return;
+        }
+
+        entity.setResults(details);
+        onSuccess(entity);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+//        if (mAdapter != null) {
+//            mAdapter.setData(null);
+//        }
     }
 }

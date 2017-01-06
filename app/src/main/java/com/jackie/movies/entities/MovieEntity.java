@@ -56,9 +56,9 @@ import java.util.List;
 
 public class MovieEntity implements Parcelable {
 
-    private int page;
-    private int total_results;
-    private int total_pages;
+    private int page = -1;
+    private int total_results = -1;
+    private int total_pages = -1;
     private List<MovieDetail> results;
 
     public int getPage() { return page;}

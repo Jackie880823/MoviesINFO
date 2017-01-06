@@ -62,7 +62,7 @@ public class MovieDetail implements Parcelable {
     private boolean adult;
     private String overview;
     private String release_date;
-    private int id;
+    private long id;
     private String original_title;
     private String original_language;
     private String title;
@@ -89,9 +89,9 @@ public class MovieDetail implements Parcelable {
 
     public void setRelease_date(String release_date) { this.release_date = release_date;}
 
-    public int getId() { return id;}
+    public long getId() { return id;}
 
-    public void setId(int id) { this.id = id;}
+    public void setId(long id) { this.id = id;}
 
     public String getOriginal_title() { return original_title;}
 
@@ -173,7 +173,7 @@ public class MovieDetail implements Parcelable {
         dest.writeByte(this.adult ? (byte) 1 : (byte) 0);
         dest.writeString(this.overview);
         dest.writeString(this.release_date);
-        dest.writeInt(this.id);
+        dest.writeLong(this.id);
         dest.writeString(this.original_title);
         dest.writeString(this.original_language);
         dest.writeString(this.title);
@@ -192,7 +192,7 @@ public class MovieDetail implements Parcelable {
         this.adult = in.readByte() != 0;
         this.overview = in.readString();
         this.release_date = in.readString();
-        this.id = in.readInt();
+        this.id = in.readLong();
         this.original_title = in.readString();
         this.original_language = in.readString();
         this.title = in.readString();

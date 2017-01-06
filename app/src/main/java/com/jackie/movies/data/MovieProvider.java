@@ -126,6 +126,14 @@ public class MovieProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * @param uri
+     * @param projection
+     * @param selection
+     * @param selectionArgs
+     * @param sortOrder
+     * @return
+     */
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
@@ -165,28 +173,54 @@ public class MovieProvider extends ContentProvider {
                 break;
 
             case POPULAR: {
-                tableName = Movie.TABLE_NAME;
+                tableName = null;
                 int page = (int) MovieContract.getLongForUri(uri);
                 long pageType = (page << 2) + TYPE_POPULAR;
+
                 Log.d(TAG, "query: pageType is " + pageType);
-                selection = selection + AND + Movie.PAGE_TYPE + equal + pageType + " ";
+                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie.POPULARITY);
                 break;
             }
 
             case TOP_RATED: {
-                tableName = Movie.TABLE_NAME;
+                tableName = null;
                 int page = (int) MovieContract.getLongForUri(uri);
                 long pageType = (page << 2) + TYPE_TOP_RATED;
                 Log.d(TAG, "query: pageType is " + pageType);
-                selection = selection + AND + Movie.PAGE_TYPE + equal + pageType + " ";
+                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie.VOTE_AVERAGE);
                 break;
             }
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        result = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
+        if (TextUtils.isEmpty(tableName)) {
+            result = db.rawQuery(selection, null);
+        } else {
+            result = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
+
+        }
+        StringBuilder stringBuilder = new StringBuilder("result's column is [ ");
+        for (String s : result.getColumnNames()) {
+            stringBuilder.append(s).append(",");
+        }
+        stringBuilder.append("]");
+        Log.d(TAG, "query: result " + stringBuilder.toString());
         return result;
+    }
+
+    @NonNull
+    private String getInnerSql(String AND, String equal, String language, long pageType, String
+            orderBy) {
+        String selection;
+        selection = "SELECT * FROM " + Movie.TABLE_NAME + " INNER JOIN " + Page
+                .TABLE_NAME + " ON " + Movie.TABLE_NAME + "." + Movie.PAGE_TYPE + equal +
+                Page.TABLE_NAME + "." + Page.PAGE_TYPE + AND + Movie.TABLE_NAME + "." +
+                MovieContract.LANGUAGE_CODE + equal + Page.TABLE_NAME + "." +
+                MovieContract.LANGUAGE_CODE + " WHERE " + Movie.TABLE_NAME + "." + Movie
+                .PAGE_TYPE + equal + pageType + AND + Movie.TABLE_NAME + "." +
+                MovieContract.LANGUAGE_CODE + " = '" + language + "'" + orderBy;
+        return selection;
     }
 
     @Nullable

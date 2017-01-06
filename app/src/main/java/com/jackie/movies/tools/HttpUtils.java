@@ -43,8 +43,6 @@
 package com.jackie.movies.tools;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -87,31 +85,9 @@ public class HttpUtils {
 
     private static class CallListener implements Callback {
         private static final String TAG = "CallListener";
-        public static final int HANDLER_MESSAGE_WHAT_CANCELED = 0x3e9;
-        public static final int HANDLER_MESSAGE_WHAT_SUCCESS = 0x3ea;
-        public static final int HANDLER_MESSAGE_WHAT_FAILURE = 0x3eb;
-        public static final String RESPONSE_STR = "response_str";
 
         private Context mContext;
         private HttpCallBack mCallBack;
-
-        private Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                switch (msg.what) {
-                    case HANDLER_MESSAGE_WHAT_CANCELED:
-                        mCallBack.onCanceled();
-                        break;
-                    case HANDLER_MESSAGE_WHAT_SUCCESS:
-                        mCallBack.onSuccess(msg.getData().getString(RESPONSE_STR));
-                        break;
-                    case HANDLER_MESSAGE_WHAT_FAILURE:
-                        mCallBack.onFailure((IOException) msg.obj);
-                        break;
-                }
-            }
-        };
 
         public CallListener(Context context, HttpCallBack callBack) {
             this.mContext = context;
@@ -122,16 +98,12 @@ public class HttpUtils {
         @Override
         public void onFailure(final Call call, final IOException e) {
             Log.e(TAG, "onFailure: [ message = " + e.getLocalizedMessage() + " ]", e);
-            Message message = new Message();
 
             if (call.isCanceled()) {
-                message.what = HANDLER_MESSAGE_WHAT_CANCELED;
+                mCallBack.onCanceled();
             } else {
-                message.what = HANDLER_MESSAGE_WHAT_FAILURE;
-                message.obj = e;
                 mCallBack.onFailure(e);
             }
-            handler.sendMessage(message);
         }
 
         @Override
@@ -143,17 +115,13 @@ public class HttpUtils {
                 return;
             }
 
-            Message message = new Message();
             if (response.isSuccessful()) {
                 ResponseBody body = response.body();
-                final String string = body.string();
-                Log.d(TAG, "onResponse: body " + string);
-                message.what = HANDLER_MESSAGE_WHAT_SUCCESS;
-                message.getData().putString(RESPONSE_STR, string);
+                String string = body.string();
+                mCallBack.onSuccess(string);
             } else {
-                message.what = HANDLER_MESSAGE_WHAT_CANCELED;
+                mCallBack.onCanceled();
             }
-            handler.sendMessage(message);
             response.close();
         }
     }

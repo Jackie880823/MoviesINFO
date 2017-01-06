@@ -52,4 +52,5 @@
     <string name="title_activity_detail">影片详情</string>
     <string name="title_popular_movies">高人气电影</string>
     <string name="title_top_rated_movies">高评分电影</string>
+    <string name="action_favorite">收藏</string>
 </resources>
