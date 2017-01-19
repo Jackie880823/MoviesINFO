@@ -40,54 +40,83 @@
  *  limitations under the License.
  */
 
-package com.jackie.movies;
+package com.jackie.movies.entities;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * Created 16/11/24.
+ * Created 17/1/13.
  *
  * @author Jackie
  * @version 1.0
  */
 
-public class Constants {
-    private static final String SERVICE_API = App.getInstance().getString(R.string.api_service_url);
-    private static final String IMAGE_BASE_URI = App.getInstance().getString(R.string
-            .image_base_url);
-
+public class Videos implements Parcelable {
     /**
-     * 高分电影
+     * id : 550
+     * results : [{"id":"533ec654c3a36854480003eb","iso_639_1":"en","iso_3166_1":"US",
+     * "key":"SUXWAEX2jlg","name":"Trailer 1","site":"YouTube","size":720,"type":"Trailer"}]
      */
-    public static final String MOVIE_TOP_RATED = SERVICE_API + "movie/top_rated?";
 
-    /**
-     * 热门电影
-     */
-    public static final String MOVIE_POPULAR = SERVICE_API + "movie/popular?";
+    private int id;
+    private List<Trailer> results;
 
-    /**
-     *
-     */
-    public static final String GET_DETAILS = SERVICE_API + "movie/%s?";
+    public int getId() { return id;}
 
-    public static final String GET_VIDEOS = SERVICE_API + "movie/%s/videos?";
+    public void setId(int id) { this.id = id;}
 
-    public static final String GET_REVIEWS = SERVICE_API + "movie/%s/reviews?";
+    public List<Trailer> getResults() { return results;}
 
-    public static final String LANGUAGE_PARAM = "language";
+    public void setResults(List<Trailer> results) { this.results = results;}
 
-    public static final String API_KEY_PARAM = "api_key";
+    @Override
+    public int describeContents() { return 0; }
 
-    public static final String PAGE_PARAM = "page";
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeList(this.results);
+    }
 
-    public static final String SMALL_IMAGE = IMAGE_BASE_URI + "w342";
+    public Videos() {}
 
-    public static final String MEDIUM_IMAGE = IMAGE_BASE_URI + "w500";
+    protected Videos(Parcel in) {
+        this.id = in.readInt();
+        this.results = new ArrayList<Trailer>();
+        in.readList(this.results, Trailer.class.getClassLoader());
+    }
 
-    public static final String ORIGINAL_IMAGE = IMAGE_BASE_URI + "original";
+    public static final Parcelable.Creator<Videos> CREATOR = new Parcelable.Creator<Videos>() {
+        @Override
+        public Videos createFromParcel(Parcel source) {return new Videos(source);}
 
-    public static final String EXTRA_MOVIE = "extra_movie";
+        @Override
+        public Videos[] newArray(int size) {return new Videos[size];}
+    };
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Videos)) return false;
+        Videos videos = (Videos) o;
+        return getId() == videos.getId();
+    }
 
-    public static final String TRANSIT_PIC = "picture";
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 
+    @Override
+    public String toString() {
+        return "Videos{" +
+                "id=" + id +
+                ", results=[" + results +
+                "]}";
+    }
 }

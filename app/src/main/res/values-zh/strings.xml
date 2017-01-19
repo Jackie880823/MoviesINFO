@@ -46,9 +46,11 @@
     <string name="action_popular_type">热门</string>
     <string name="action_refresh">刷新</string>
     <string name="action_top_rated_type">高分</string>
-    <string name="film_popularity">人气：</string>
-    <string name="film_release_date">上映日期：</string>
     <string name="film_title">电影名称：</string>
+    <string name="film_release_date">上映日期：</string>
+    <string name="film_popularity">人   气：</string>
+    <string name="film_vote_average">评   分：</string>
+    <string name="film_vote_count">票   数：</string>
     <string name="title_activity_detail">影片详情</string>
     <string name="title_popular_movies">高人气电影</string>
     <string name="title_top_rated_movies">高评分电影</string>
