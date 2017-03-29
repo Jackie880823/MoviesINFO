@@ -59,9 +59,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.TextView;
 
 import com.jackie.movies.Adapter;
+import com.jackie.movies.App;
 import com.jackie.movies.R;
 import com.jackie.movies.UpdateMoviesTask;
 import com.jackie.movies.base.BaseActivity;
@@ -78,8 +80,9 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
     private static final String TAG = "MovieActivity";
     public static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
 
-    private static final int SWIPE_THRESHOLD = 100;
-    private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+    private static final int GESTURE_THRESHOLD_DP = ViewConfiguration.get(App.getInstance())
+            .getScaledTouchSlop();
+
     private static final int MOVIE_LOADER_ID = 0x3e8;
     private static final int MOVIE_FAVORITE_ID = 0x3e9;
 
@@ -243,7 +246,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
         float diffY = motionEvent1.getY() - motionEvent.getY();
         float diffX = motionEvent1.getX() - motionEvent.getX();
         if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(v) > SWIPE_VELOCITY_THRESHOLD) {
+            if (Math.abs(diffX) > GESTURE_THRESHOLD_DP) {
                 if (diffX > 0) {
                     Log.d(TAG, "onFling: onSwipeRight()");
                     if (entity != null && currentPage > 1) {
@@ -260,7 +263,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
                     }
                 }
             }
-        } else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(v1) > SWIPE_VELOCITY_THRESHOLD) {
+        } else if (Math.abs(diffY) > GESTURE_THRESHOLD_DP) {
             if (diffY > 0) {
                 Log.d(TAG, "onFling: onSwipeBottom()");
             } else {
@@ -268,6 +271,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
             }
             result = true;
         }
+        Log.d(TAG, "onFling: result is " + result);
         return result;
     }
 
@@ -386,8 +390,8 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-//        if (mAdapter != null) {
-//            mAdapter.setData(null);
-//        }
+        // if (mAdapter != null) {
+        //     mAdapter.setData(null);
+        // }
     }
 }

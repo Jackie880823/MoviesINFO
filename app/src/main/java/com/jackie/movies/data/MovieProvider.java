@@ -136,8 +136,8 @@ public class MovieProvider extends ContentProvider {
      */
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
-                        String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[]
+            selectionArgs, String sortOrder) {
         String AND = " AND ";
         String equal = "=";
         String language = Locale.getDefault().getLanguage();
@@ -178,7 +178,8 @@ public class MovieProvider extends ContentProvider {
                 long pageType = (page << 2) + TYPE_POPULAR;
 
                 Log.d(TAG, "query: pageType is " + pageType);
-                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie.POPULARITY);
+                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie
+                        .POPULARITY);
                 break;
             }
 
@@ -187,7 +188,8 @@ public class MovieProvider extends ContentProvider {
                 int page = (int) MovieContract.getLongForUri(uri);
                 long pageType = (page << 2) + TYPE_TOP_RATED;
                 Log.d(TAG, "query: pageType is " + pageType);
-                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie.VOTE_AVERAGE);
+                selection = getInnerSql(AND, equal, language, pageType, " order by " + Movie
+                        .VOTE_AVERAGE);
                 break;
             }
 
@@ -197,7 +199,8 @@ public class MovieProvider extends ContentProvider {
         if (TextUtils.isEmpty(tableName)) {
             result = db.rawQuery(selection, null);
         } else {
-            result = db.query(tableName, projection, selection, selectionArgs, null, null, sortOrder);
+            result = db.query(tableName, projection, selection, selectionArgs, null, null,
+                    sortOrder);
 
         }
         StringBuilder stringBuilder = new StringBuilder("result's column is [ ");
@@ -257,19 +260,27 @@ public class MovieProvider extends ContentProvider {
 
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         Uri insertedUri;
+        String tableName;
         switch (mMatcher.match(uri)) {
             case MOVIES:
-                db.insert(Movie.TABLE_NAME, null, values);
                 Long movieId = values.getAsLong(Movie.MOVIE_ID);
                 insertedUri = Movie.buildMovieUri(movieId);
+                tableName = Movie.TABLE_NAME;
                 break;
             case PAGES:
-                db.insert(Page.TABLE_NAME, null, values);
                 Long pageType = values.getAsLong(Page.PAGE_TYPE);
                 insertedUri = Page.buildPageUri(pageType);
+                tableName = Page.TABLE_NAME;
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        Cursor cursor = query(insertedUri, null, null, null, null);
+        if (cursor != null) {
+            cursor.close();
+            update(uri, values, null, null);
+        } else {
+            db.insert(tableName, null, values);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return insertedUri;
@@ -314,7 +325,8 @@ public class MovieProvider extends ContentProvider {
     }
 
     @Override
-    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[]
+            selectionArgs) {
         String AND = " AND ";
         String language = Locale.getDefault().getLanguage();
         if (TextUtils.isEmpty(selection)) {

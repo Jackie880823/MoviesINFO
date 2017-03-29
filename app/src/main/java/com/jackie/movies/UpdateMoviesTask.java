@@ -48,7 +48,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -129,7 +128,7 @@ public class UpdateMoviesTask extends AsyncTask<String, Integer, Void>  {
             @Override
             public void onFailure(IOException e) {
                 Log.e(TAG, "onFailure: ", e);
-                Toast.makeText(mContext, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(mContext, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             }
         });
         return null;
