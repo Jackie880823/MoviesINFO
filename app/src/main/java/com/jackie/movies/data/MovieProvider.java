@@ -276,12 +276,22 @@ public class MovieProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         Cursor cursor = query(insertedUri, null, null, null, null);
-        if (cursor != null) {
-            cursor.close();
-            update(uri, values, null, null);
+        if (cursor != null && cursor.getCount() > 0) {
+            if (Movie.TABLE_NAME.equals(tableName)) {
+                cursor.moveToFirst();
+                int favourIndex = cursor.getColumnIndex(Movie.FAVOUR);
+                int anInt = cursor.getInt(favourIndex);
+                values.put(Movie.FAVOUR, anInt);
+            }
+            update(insertedUri, values, null, null);
         } else {
             db.insert(tableName, null, values);
         }
+
+        if (cursor != null && !cursor.isClosed()) {
+            cursor.close();
+        }
+
         getContext().getContentResolver().notifyChange(uri, null);
         return insertedUri;
     }
