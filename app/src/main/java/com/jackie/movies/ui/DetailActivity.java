@@ -42,6 +42,8 @@
 
 package com.jackie.movies.ui;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -58,6 +60,7 @@ import com.google.gson.GsonBuilder;
 import com.jackie.movies.Constants;
 import com.jackie.movies.R;
 import com.jackie.movies.base.BaseActivity;
+import com.jackie.movies.data.MovieContract;
 import com.jackie.movies.entities.MovieDetail;
 import com.jackie.movies.entities.Videos;
 import com.jackie.movies.tools.HttpUtils;
@@ -108,6 +111,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private RecyclerView recVideos;
 
     private RecyclerView recReviews;
+    private FloatingActionButton fabFavour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,8 +193,9 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         ImageLoadUtil.loadBackDropImage(this, backdropUrl, imgBackdrop);
         ImageLoadUtil.loadPosterImage(this, posterUrl, imgPoster);
 
-        FloatingActionButton fab = getViewById(R.id.fab);
-        fab.setOnClickListener(this);
+        fabFavour = getViewById(R.id.fab_favour);
+        fabFavour.setOnClickListener(this);
+        checkFavour(detail.isFavour());
         if (actionBar == null) {
             return;
         }
@@ -218,10 +223,35 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     public void onClick(View view) {
         int id = view.getId();
         switch (id) {
-            case R.id.fab:
+            case R.id.fab_favour:
+                updateMark();
                 break;
             default:
                 break;
         }
     }
+
+    private void updateMark() {
+        ContentValues values = new ContentValues();
+        boolean favour = detail.isFavour();
+        values.put(MovieContract.Movie.FAVOUR, !favour);
+        Uri uri = MovieContract.Movie.buildMovieUri(detail.getId());
+        ContentResolver contentResolver = getContentResolver();
+        int update = contentResolver.update(uri, values, null, null);
+
+        if (update == 1) {
+            detail.setFavour(!favour);
+            checkFavour(!favour);
+        }
+    }
+
+    private void checkFavour(boolean favour) {
+        if (favour) {
+            fabFavour.setImageResource(R.drawable.ic_bookmark);
+        } else {
+            fabFavour.setImageResource(R.drawable.ic_bookmark_border);
+        }
+    }
+
+
 }

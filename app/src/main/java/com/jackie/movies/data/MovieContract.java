@@ -132,7 +132,7 @@ public class MovieContract {
          * @param movieId
          * @return
          */
-        static Uri buildMovieUri(long movieId) {
+        public static Uri buildMovieUri(long movieId) {
            return ContentUris.withAppendedId(CONTENT_URI, movieId);
         }
 

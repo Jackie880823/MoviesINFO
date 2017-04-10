@@ -121,7 +121,6 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
-        loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
         loaderManager.initLoader(MOVIE_FAVORITE_ID, null, this);
         updateMovies();
     }
@@ -196,7 +195,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
             mAdapter = new Adapter(this, entity.getResults());
             recyclerView.setAdapter(mAdapter);
             Log.d(TAG, "run: " + mAdapter.getItemCount());
-            currentPage = entity.getPage();
+            currentPage = entity.getPage() < 0? currentPage : entity.getPage();
             String description = String.format(getString(R.string.txt_page_description),
                     currentPage, entity.getTotal_pages());
             tvPage.setText(description);
@@ -306,7 +305,9 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data == null || data.getCount() < 0) {
+        if (data == null || data.getCount() <= 0) {
+            Log.d(TAG, "onLoadFinished: data is empty");
+            updateMovies();
             return;
         }
 
@@ -327,6 +328,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
         final int columnVideo = data.getColumnIndex(Movie.VIDEO);
         final int columnVoteAverage = data.getColumnIndex(Movie.VOTE_AVERAGE);
         final int columnGenreIds = data.getColumnIndex(Movie.GENRE_IDS);
+        final int columnFavour = data.getColumnIndex(Movie.FAVOUR);
 
 
         boolean hasPage = columnTotalResults > -1;
@@ -377,6 +379,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
                 ids.add(Integer.valueOf(s));
             }
             detail.setGenre_ids(ids);
+            detail.setFavour(data.getInt(columnFavour) == 1);
             details.add(detail);
         }
 
@@ -390,6 +393,7 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG, "onLoaderReset: ");
         // if (mAdapter != null) {
         //     mAdapter.setData(null);
         // }

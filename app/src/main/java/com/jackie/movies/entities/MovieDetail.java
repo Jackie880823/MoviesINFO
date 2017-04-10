@@ -72,6 +72,7 @@ public class MovieDetail implements Parcelable {
     private boolean video;
     private double vote_average;
     private List<Integer> genre_ids;
+    private boolean favour;
 
     public String getPoster_path() { return poster_path;}
 
@@ -95,13 +96,15 @@ public class MovieDetail implements Parcelable {
 
     public String getOriginal_title() { return original_title;}
 
-    public void setOriginal_title(String original_title) { this.original_title =
-            original_title;}
+    public void setOriginal_title(String original_title) {
+        this.original_title = original_title;
+    }
 
     public String getOriginal_language() { return original_language;}
 
-    public void setOriginal_language(String original_language) { this.original_language =
-            original_language;}
+    public void setOriginal_language(String original_language) {
+        this.original_language = original_language;
+    }
 
     public String getTitle() { return title;}
 
@@ -131,6 +134,14 @@ public class MovieDetail implements Parcelable {
 
     public void setGenre_ids(List<Integer> genre_ids) { this.genre_ids = genre_ids;}
 
+    public boolean isFavour() {
+        return favour;
+    }
+
+    public void setFavour(boolean favour) {
+        this.favour = favour;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -146,23 +157,16 @@ public class MovieDetail implements Parcelable {
 
     @Override
     public String toString() {
-        return "MovieDetail{" +
-                "poster_path='" + poster_path + '\'' +
-                ", adult=" + adult +
-                ", overview='" + overview + '\'' +
-                ", release_date='" + release_date + '\'' +
-                ", id=" + id +
-                ", original_title='" + original_title + '\'' +
-                ", original_language='" + original_language + '\'' +
-                ", title='" + title + '\'' +
-                ", backdrop_path='" + backdrop_path + '\'' +
-                ", popularity=" + popularity +
-                ", vote_count=" + vote_count +
-                ", video=" + video +
-                ", vote_average=" + vote_average +
-                ", genre_ids=" + genre_ids +
-                '}';
+        return "MovieDetail{" + "poster_path='" + poster_path + '\'' + ", adult=" + adult + ", " +
+                "overview='" + overview + '\'' + ", release_date='" + release_date + '\'' + ", " +
+                "id=" + id + ", original_title='" + original_title + '\'' + ", " +
+                "original_language='" + original_language + '\'' + ", title='" + title + '\'' +
+                ", backdrop_path='" + backdrop_path + '\'' + ", popularity=" + popularity + ", " +
+                "vote_count=" + vote_count + ", video=" + video + ", vote_average=" +
+                vote_average + ", genre_ids=" + genre_ids + '}';
     }
+
+    public MovieDetail() {}
 
     @Override
     public int describeContents() { return 0; }
@@ -183,9 +187,8 @@ public class MovieDetail implements Parcelable {
         dest.writeByte(this.video ? (byte) 1 : (byte) 0);
         dest.writeDouble(this.vote_average);
         dest.writeList(this.genre_ids);
+        dest.writeByte(this.favour ? (byte) 1 : (byte) 0);
     }
-
-    public MovieDetail() {}
 
     protected MovieDetail(Parcel in) {
         this.poster_path = in.readString();
@@ -203,9 +206,10 @@ public class MovieDetail implements Parcelable {
         this.vote_average = in.readDouble();
         this.genre_ids = new ArrayList<Integer>();
         in.readList(this.genre_ids, Integer.class.getClassLoader());
+        this.favour = in.readByte() != 0;
     }
 
-    public static final Parcelable.Creator<MovieDetail> CREATOR = new Parcelable.Creator<MovieDetail>() {
+    public static final Creator<MovieDetail> CREATOR = new Creator<MovieDetail>() {
         @Override
         public MovieDetail createFromParcel(Parcel source) {return new MovieDetail(source);}
 
