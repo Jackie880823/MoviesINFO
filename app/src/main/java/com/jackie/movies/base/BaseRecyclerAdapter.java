@@ -56,8 +56,8 @@ import java.util.List;
  * @version 1.0
  */
 
-public abstract class BaseRecyclerAdapter<VH extends ViewHolder, E> extends RecyclerView
-        .Adapter<VH> {
+public abstract class BaseRecyclerAdapter<E> extends RecyclerView
+        .Adapter<ViewHolder<E>> {
 
     protected List<E> mData;
 
@@ -108,7 +108,7 @@ public abstract class BaseRecyclerAdapter<VH extends ViewHolder, E> extends Recy
     }
 
     @Override
-    public void onBindViewHolder(VH holder, int position) {
+    public void onBindViewHolder(ViewHolder<E> holder, int position) {
         holder.bindEntity(mData.get(position));
     }
 
