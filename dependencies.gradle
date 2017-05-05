@@ -41,23 +41,26 @@
  */
 
 ext {
-    compileSdkVersion = 25
-    buildToolsVersion = "25.0.0"
-    applicationId = "com.jackie.movies"
-    minSdkVersion = 19
-    targetSdkVersion = 25
-    versionCode = 1
-    versionName = "1.0"
-    testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+    compileSdkVersion           = 25
+    buildToolsVersion           = "25.0.0"
+    applicationId               = "com.jackie.movies"
+    minSdkVersion               = 19
+    targetSdkVersion            = 25
+    versionCode                 = 1
+    versionName                 = "1.0"
+    testInstrumentationRunner   = "android.support.test.runner.AndroidJUnitRunner"
+    supportVersion              = '25.1.1'
 
     dep = [
-            androidPlugin   : 'com.android.tools.build:gradle:2.2.2',
-            appcomaptV7     : 'com.android.support:appcompat-v7:25.0.1',
-            design          : 'com.android.support:design:25.0.1',
-            gson            : 'com.google.code.gson:gson:2.8.0',
-            okhttp          : 'com.squareup.okhttp3:okhttp:3.4.2',
-            picasso         : 'com.squareup.picasso:picasso:2.5.2',
-            espresso        : 'com.android.support.test.espresso:espresso-core:2.2.2',
-            junit           : 'junit:junit:4.12',
+            appcomaptV7         : 'com.android.support:appcompat-v7:' + supportVersion,
+            design              : 'com.android.support:design:' + supportVersion,
+
+            gson                : 'com.google.code.gson:gson:2.8.0',
+            okHttp              : 'com.squareup.okhttp3:okhttp:3.4.2',
+            picasso             : 'com.squareup.picasso:picasso:2.5.2',
+            espresso            : 'com.android.support.test.espresso:espresso-core:2.2.2',
+            superRecyclerView   : 'com.malinskiy:superrecyclerview:1.1.4',
+
+            junit               : 'junit:junit:4.12',
     ]
 }

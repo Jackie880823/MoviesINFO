@@ -65,20 +65,10 @@
             app:popupTheme="@style/AppTheme.PopupOverlay"/>
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_movie"/>
-
-    <TextView
-        android:id="@+id/tv_page_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:background="@color/translucence"
-        android:padding="@dimen/small_padding"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        app:layout_anchor="@+id/rec_view"
-        app:layout_anchorGravity="center|bottom"
-        app:layout_behavior="@string/bottom_sheet_behavior"
-        tools:visibility="visible"/>
+    <com.malinskiy.superrecyclerview.SuperRecyclerView
+        android:id="@+id/rec_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

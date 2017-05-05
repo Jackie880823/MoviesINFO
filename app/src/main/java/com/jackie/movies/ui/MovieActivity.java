@@ -50,20 +50,16 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.GestureDetector;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.widget.TextView;
 
 import com.jackie.movies.Adapter;
-import com.jackie.movies.App;
 import com.jackie.movies.R;
 import com.jackie.movies.UpdateMoviesTask;
 import com.jackie.movies.base.BaseActivity;
@@ -71,17 +67,16 @@ import com.jackie.movies.data.MovieContract.Movie;
 import com.jackie.movies.data.MovieContract.Page;
 import com.jackie.movies.entities.MovieDetail;
 import com.jackie.movies.entities.MovieEntity;
+import com.malinskiy.superrecyclerview.OnMoreListener;
+import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class MovieActivity extends BaseActivity implements GestureDetector.OnGestureListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class MovieActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+        SwipeRefreshLayout.OnRefreshListener, OnMoreListener {
     private static final String TAG = "MovieActivity";
     public static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
-
-    private static final int GESTURE_THRESHOLD_DP = ViewConfiguration.get(App.getInstance())
-            .getScaledTouchSlop();
 
     private static final int MOVIE_LOADER_ID = 0x3e8;
     private static final int MOVIE_FAVORITE_ID = 0x3e9;
@@ -89,48 +84,48 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
     private MenuItem menuForType;
     private boolean isPopular = true;
     private int currentPage = 1;
-    private RecyclerView recyclerView;
-    private TextView tvPage;
+    private SuperRecyclerView recyclerView;
     private Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
     private SharedPreferences preferences;
     private MovieEntity entity;
-    private GestureDetector detector;
     private LoaderManager loaderManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loaderManager = getSupportLoaderManager();
 
-        detector = new GestureDetector(this, this);
-
-        tvPage = getViewById(R.id.tv_page_description);
-
-        recyclerView = getViewById(R.id.rec_view);
-        layoutManager = new GridLayoutManager(this, 2);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                detector.onTouchEvent(motionEvent);
-                return false;
-            }
-        });
-
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+        loaderManager   = getSupportLoaderManager();
+        loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
         loaderManager.initLoader(MOVIE_FAVORITE_ID, null, this);
+
+        recyclerView    = getViewById(R.id.rec_view);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(layoutManager);
+        TypedValue value = new TypedValue();
+        getTheme().resolveAttribute(R.attr.colorPrimary, value, true);
+        int colorPrimary = value.data;
+        getTheme().resolveAttribute(R.attr.colorPrimaryDark, value, true);
+        int colorPrimaryDark = value.data;
+        recyclerView.setRefreshingColor(colorPrimary, colorPrimary, colorPrimary, colorPrimaryDark);
+        recyclerView.setRefreshListener(this);
+        recyclerView.setRefreshing(true);
+        recyclerView.setupMoreListener(this, 1);
+
+        preferences     = PreferenceManager.getDefaultSharedPreferences(this);
+        isPopular       = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         updateMovies();
     }
 
     private void updateMovies() {
         Log.d(TAG, "updateMovies() called");
 
-        getSupportLoaderManager().destroyLoader(MOVIE_LOADER_ID);
-        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID, null, this);
-        tvPage.setVisibility(View.GONE);
+        loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
 
         String[] param = new String[]{String.valueOf(isPopular), String.valueOf(currentPage)};
         UpdateMoviesTask task = new UpdateMoviesTask(this);
@@ -165,13 +160,13 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
                 setMenuTitle(isPopular);
 
                 currentPage = 1;
+                recyclerView.setupMoreListener(this, 1);
+
                 preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
-                loaderManager.destroyLoader(MOVIE_LOADER_ID);
                 loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
                 break;
 
             case R.id.action_favorite:
-                loaderManager.destroyLoader(MOVIE_FAVORITE_ID);
                 loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
                 break;
         }
@@ -190,88 +185,26 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
 
     public void onSuccess(MovieEntity entity) {
         Log.d(TAG, "onSuccess() called with: string = [" + entity + "]");
-        if (entity != null) {
-            Log.d(TAG, "onSuccess: entity {" + entity.toString() + "}");
+
+        if (mAdapter == null) {
             mAdapter = new Adapter(this, entity.getResults());
             recyclerView.setAdapter(mAdapter);
-            Log.d(TAG, "run: " + mAdapter.getItemCount());
-            currentPage = entity.getPage() < 0? currentPage : entity.getPage();
-            String description = String.format(getString(R.string.txt_page_description),
-                    currentPage, entity.getTotal_pages());
-            tvPage.setText(description);
+        } else if (recyclerView.isLoadingMore()) {
+            mAdapter.addData(entity.getResults());
+        } else {
+            mAdapter.setData(entity.getResults());
         }
+
+        recyclerView.setLoadingMore(false);
+        recyclerView.setRefreshing(false);
+
+        Log.d(TAG, "run: " + mAdapter.getItemCount());
+        currentPage = entity.getPage() < 0 ? currentPage : entity.getPage();
     }
 
     @Override
     protected int getLayoutId() {
         return R.layout.activity_movie;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent motionEvent) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        tvPage.setVisibility(View.VISIBLE);
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent motionEvent) {
-
-    }
-
-    @Override
-    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        tvPage.setVisibility(View.GONE);
-
-        boolean result = false;
-        if (motionEvent == null || motionEvent1 == null) {
-            return false;
-        }
-
-        float diffY = motionEvent1.getY() - motionEvent.getY();
-        float diffX = motionEvent1.getX() - motionEvent.getX();
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (Math.abs(diffX) > GESTURE_THRESHOLD_DP) {
-                if (diffX > 0) {
-                    Log.d(TAG, "onFling: onSwipeRight()");
-                    if (entity != null && currentPage > 1) {
-                        currentPage -= 1;
-                        updateMovies();
-                        result = true;
-                    }
-                } else {
-                    Log.d(TAG, "onFling: onSwipeLeft()");
-                    if (entity != null && currentPage < entity.getTotal_pages()) {
-                        currentPage += 1;
-                        updateMovies();
-                        result = true;
-                    }
-                }
-            }
-        } else if (Math.abs(diffY) > GESTURE_THRESHOLD_DP) {
-            if (diffY > 0) {
-                Log.d(TAG, "onFling: onSwipeBottom()");
-            } else {
-                Log.d(TAG, "onFling: onSwipeTop()");
-            }
-            result = true;
-        }
-        Log.d(TAG, "onFling: result is " + result);
-        return result;
     }
 
     /**
@@ -307,7 +240,11 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data == null || data.getCount() <= 0) {
             Log.d(TAG, "onLoadFinished: data is empty");
-            updateMovies();
+            recyclerView.removeMoreListener();
+            recyclerView.hideMoreProgress();
+            recyclerView.setLoadingMore(false);
+            recyclerView.setRefreshing(false);
+            currentPage = entity.getPage();
             return;
         }
 
@@ -382,11 +319,6 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
             detail.setFavour(data.getInt(columnFavour) == 1);
             details.add(detail);
         }
-
-        if (details.isEmpty()) {
-            return;
-        }
-
         entity.setResults(details);
         onSuccess(entity);
     }
@@ -397,5 +329,35 @@ public class MovieActivity extends BaseActivity implements GestureDetector.OnGes
         // if (mAdapter != null) {
         //     mAdapter.setData(null);
         // }
+    }
+
+    /**
+     * Called when a swipe gesture triggers a refresh.
+     */
+    @Override
+    public void onRefresh() {
+        currentPage = 1;
+        recyclerView.setupMoreListener(this, 1);
+        updateMovies();
+    }
+
+    /**
+     * @param overallItemsCount
+     * @param itemsBeforeMore
+     * @param maxLastVisiblePosition for staggered grid this is max of all spans
+     */
+    @Override
+    public void onMoreAsked(int overallItemsCount, int itemsBeforeMore, int
+            maxLastVisiblePosition) {
+        if (entity == null) {
+            currentPage = 1;
+        } else if (currentPage < entity.getTotal_pages()) {
+            currentPage += 1;
+        } else {
+            recyclerView.removeMoreListener();
+            recyclerView.setLoadingMore(false);
+            return;
+        }
+        updateMovies();
     }
 }

@@ -68,11 +68,15 @@ android {
 
 dependencies {
     compile             fileTree(include: ['*.jar'], dir: 'libs')
+
     compile             dep.appcomaptV7
     compile             dep.design
-    compile             dep.okhttp
-    compile             dep.picasso
+
     compile             dep.gson
+    compile             dep.okHttp
+    compile             dep.picasso
+    compile             dep.superRecyclerView
+
     androidTestCompile( dep.espresso, {
         exclude group:  dep.'com.android.support', module: 'support-annotations'
     })
