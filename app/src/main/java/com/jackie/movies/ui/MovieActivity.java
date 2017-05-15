@@ -42,14 +42,14 @@
 
 package com.jackie.movies.ui;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -73,32 +73,32 @@ import com.malinskiy.superrecyclerview.SuperRecyclerView;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MovieActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        SwipeRefreshLayout.OnRefreshListener, OnMoreListener {
+public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener,
+        OnMoreListener, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "MovieActivity";
-    public static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
+    public static final String PREF_IS_POPULAR_KEY  = "pref_is_popular_key";
 
-    private static final int MOVIE_LOADER_ID = 0x3e8;
-    private static final int MOVIE_FAVORITE_ID = 0x3e9;
+    private static final int MOVIE_LOADER_ID        = 0x3e8;
+    private static final int MOVIE_FAVORITE_ID      = 0x3e9;
 
     private MenuItem menuForType;
-    private boolean isPopular = true;
+    private boolean isPopular   = true;
+    private boolean isFavorite  = false;
     private int currentPage = 1;
     private SuperRecyclerView recyclerView;
     private Adapter mAdapter;
     private SharedPreferences preferences;
     private MovieEntity entity;
-    private LoaderManager loaderManager;
+    private android.app.LoaderManager loaderManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loaderManager   = getSupportLoaderManager();
+        loaderManager = getLoaderManager();
         loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
-        loaderManager.initLoader(MOVIE_FAVORITE_ID, null, this);
 
-        recyclerView    = getViewById(R.id.rec_view);
+        recyclerView = getViewById(R.id.rec_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(layoutManager);
         TypedValue value = new TypedValue();
@@ -111,25 +111,26 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         recyclerView.setRefreshing(true);
         recyclerView.setupMoreListener(this, 1);
 
-        preferences     = PreferenceManager.getDefaultSharedPreferences(this);
-        isPopular       = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+
+        updateMovies();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        updateMovies();
+    protected void onDestroy() {
+        super.onDestroy();
+        loaderManager.destroyLoader(MOVIE_LOADER_ID);
+        loaderManager.destroyLoader(MOVIE_FAVORITE_ID);
     }
 
     private void updateMovies() {
         Log.d(TAG, "updateMovies() called");
 
-        loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
-
         String[] param = new String[]{String.valueOf(isPopular), String.valueOf(currentPage)};
         UpdateMoviesTask task = new UpdateMoviesTask(this);
         task.execute(param);
+        loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
     }
 
     @Override
@@ -151,11 +152,16 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
 
         switch (id) {
             case R.id.action_refresh:
-                updateMovies();
+                if (isFavorite) {
+                    loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
+                } else {
+                    updateMovies();
+                }
                 break;
 
             case R.id.action_type:
                 isPopular = !isPopular;
+                isFavorite = false;
 
                 setMenuTitle(isPopular);
 
@@ -163,10 +169,14 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                 recyclerView.setupMoreListener(this, 1);
 
                 preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
-                loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+
+                updateMovies();
                 break;
 
             case R.id.action_favorite:
+
+                isFavorite = true;
+                setMenuTitle(isPopular);
                 loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
                 break;
         }
@@ -174,7 +184,9 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     private void setMenuTitle(boolean isPopular) {
-        if (isPopular) {
+        if (isFavorite) {
+            setTitle(getString(R.string.title_favorite_movies));
+        } else if (isPopular) {
             menuForType.setTitle(R.string.action_top_rated_type);
             setTitle(R.string.title_popular_movies);
         } else {
@@ -244,7 +256,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
             recyclerView.hideMoreProgress();
             recyclerView.setLoadingMore(false);
             recyclerView.setRefreshing(false);
-            currentPage = entity.getPage();
+            currentPage = 1;
             return;
         }
 
@@ -326,9 +338,9 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         Log.d(TAG, "onLoaderReset: ");
-        // if (mAdapter != null) {
-        //     mAdapter.setData(null);
-        // }
+        if (mAdapter != null) {
+            mAdapter.setData(null);
+        }
     }
 
     /**
@@ -336,9 +348,13 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
      */
     @Override
     public void onRefresh() {
-        currentPage = 1;
-        recyclerView.setupMoreListener(this, 1);
-        updateMovies();
+        if (isFavorite) {
+            loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
+        } else {
+            currentPage = 1;
+            recyclerView.setupMoreListener(this, 1);
+            updateMovies();
+        }
     }
 
     /**

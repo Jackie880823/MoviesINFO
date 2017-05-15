@@ -209,6 +209,7 @@ public class MovieProvider extends ContentProvider {
         }
         stringBuilder.append("]");
         Log.d(TAG, "query: result " + stringBuilder.toString());
+        result.setNotificationUri(getContext().getContentResolver(), uri);
         return result;
     }
 
@@ -331,6 +332,7 @@ public class MovieProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri:" + uri);
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return db.delete(tableName, selection, selectionArgs);
     }
 
@@ -370,6 +372,7 @@ public class MovieProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri:" + uri);
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return db.update(tableName, values, selection, selectionArgs);
     }
 }

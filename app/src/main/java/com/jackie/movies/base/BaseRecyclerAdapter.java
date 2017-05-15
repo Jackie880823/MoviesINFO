@@ -91,6 +91,9 @@ public abstract class BaseRecyclerAdapter<E> extends RecyclerView
         if (mData == null) {
             mData = new ArrayList<>(data);
             notifyDataSetChanged();
+        } else if (mData.containsAll(data)) {
+            mData.removeAll(data);
+            mData.addAll(data);
         } else {
             int positionStart = getItemCount();
             mData.addAll(data);

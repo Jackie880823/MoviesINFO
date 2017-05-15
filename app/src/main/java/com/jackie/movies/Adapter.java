@@ -68,7 +68,7 @@ import java.util.List;
  * @version 1.0
  */
 
-public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
+public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
 
 
     public Adapter(Context context, List<MovieDetail> data) {
@@ -76,7 +76,7 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder<MovieDetail> onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_movie, parent, false);
         return new Holder(view);
     }
@@ -108,7 +108,7 @@ public class Adapter extends BaseRecyclerAdapter<ViewHolder, MovieDetail> {
                     break;
                 default:
                     Log.d(TAG, "onClick: id [ " + id + " ] not action");
-                    return;
+                    break;
             }
         }
 
