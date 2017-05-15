@@ -40,35 +40,54 @@
  *  limitations under the License.
  */
 
-package com.jackie.movies.base;
+package com.jackie.movies.ui;
 
-import android.support.annotation.CallSuper;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.jackie.movies.R;
+import com.jackie.movies.base.BaseRecyclerAdapter;
+import com.jackie.movies.base.ViewHolder;
+import com.jackie.movies.entities.Review;
+
+import java.util.List;
 
 /**
- * Created 16/11/25.
+ * Created 17/5/15.
  *
  * @author Jackie
  * @version 1.0
  */
 
-
-public abstract class ViewHolder<E> extends RecyclerView.ViewHolder implements View
-        .OnClickListener {
-    protected E entity;
-
-    public ViewHolder(View itemView) {
-        super(itemView);
-    }
-
-    @CallSuper
-    public void bindEntity(E entity) {
-        this.entity = entity;
+public class ReviewAdapter extends BaseRecyclerAdapter<Review> {
+    public ReviewAdapter(Context context, List<Review> data) {
+        super(context, data);
     }
 
     @Override
-    public void onClick(View v) {
+    public ViewHolder<Review> onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_reviews, parent, false);
+        return new ReviewHolder(itemView);
+    }
 
+    private static class ReviewHolder extends ViewHolder<Review> implements View.OnClickListener{
+        private TextView tvAuthor;
+        private TextView tvContent;
+        public ReviewHolder(View itemView) {
+            super(itemView);
+            tvAuthor = (TextView) itemView.findViewById(R.id.tv_author);
+            tvContent = (TextView) itemView.findViewById(R.id.tv_content);
+        }
+
+        @Override
+        public void bindEntity(Review entity) {
+            super.bindEntity(entity);
+            tvAuthor.setText(entity.getAuthor());
+            tvContent.setText(entity.getContent());
+        }
     }
 }
+

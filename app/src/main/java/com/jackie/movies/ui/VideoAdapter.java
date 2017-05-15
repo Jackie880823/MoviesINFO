@@ -40,35 +40,68 @@
  *  limitations under the License.
  */
 
-package com.jackie.movies.base;
+package com.jackie.movies.ui;
 
-import android.support.annotation.CallSuper;
-import android.support.v7.widget.RecyclerView;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.jackie.movies.Constants;
+import com.jackie.movies.R;
+import com.jackie.movies.base.BaseRecyclerAdapter;
+import com.jackie.movies.base.ViewHolder;
+import com.jackie.movies.entities.Trailer;
+
+import java.util.List;
+import java.util.Locale;
 
 /**
- * Created 16/11/25.
+ * Created 17/5/15.
  *
  * @author Jackie
  * @version 1.0
  */
 
-
-public abstract class ViewHolder<E> extends RecyclerView.ViewHolder implements View
-        .OnClickListener {
-    protected E entity;
-
-    public ViewHolder(View itemView) {
-        super(itemView);
-    }
-
-    @CallSuper
-    public void bindEntity(E entity) {
-        this.entity = entity;
+public class VideoAdapter extends BaseRecyclerAdapter<Trailer> {
+    public VideoAdapter(Context context, List<Trailer> data) {
+        super(context, data);
     }
 
     @Override
-    public void onClick(View v) {
+    public ViewHolder<Trailer> onCreateViewHolder(ViewGroup parent, int viewType) {
+        ImageView imageView = new ImageView(mContext);
+        return new TrailerHolder(imageView);
+    }
 
+    private static class TrailerHolder extends ViewHolder<Trailer> implements View.OnClickListener{
+        private ImageView imageView;
+        public TrailerHolder(ImageView itemView) {
+            super(itemView);
+            this.imageView = itemView;
+            this.imageView.setImageResource(R.drawable.image_default);
+            this.imageView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            String id = entity.getId();
+            String youtubeLink = String.format(Locale.US, Constants.LINK_TO_YOUTUBE, id);
+            Intent youtubeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(youtubeLink));
+
+            PackageManager packageManager = imageView.getContext().getPackageManager();
+            for (ResolveInfo resolveInfo : packageManager.queryIntentActivities(youtubeIntent, 0)) {
+                if (resolveInfo.activityInfo.packageName.equals(Constants.YOUTUBE_PACKAGE_NAME)) {
+                    youtubeIntent.setPackage(Constants.YOUTUBE_PACKAGE_NAME);
+                    break;
+                }
+            }
+            itemView.getContext().startActivity(youtubeIntent);
+        }
     }
 }
+

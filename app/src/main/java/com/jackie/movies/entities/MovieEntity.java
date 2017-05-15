@@ -45,6 +45,8 @@ package com.jackie.movies.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+
 import java.util.List;
 
 /**
@@ -86,7 +88,9 @@ public class MovieEntity implements Parcelable {
 
         if (getPage() != that.getPage()) return false;
         if (getTotal_results() != that.getTotal_results()) return false;
-        return getTotal_pages() == that.getTotal_pages();
+        if (getTotal_pages() != that.getTotal_pages()) return false;
+        return getResults() != null ? getResults().equals(that.getResults()) : that.getResults()
+                == null;
 
     }
 
@@ -95,17 +99,13 @@ public class MovieEntity implements Parcelable {
         int result = getPage();
         result = 31 * result + getTotal_results();
         result = 31 * result + getTotal_pages();
+        result = 31 * result + (getResults() != null ? getResults().hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "MovieEntity{" +
-                "page=" + page +
-                ", total_results=" + total_results +
-                ", total_pages=" + total_pages +
-                ", results=" + results +
-                '}';
+        return "MovieEntity" + new Gson().toJson(this);
     }
 
     @Override

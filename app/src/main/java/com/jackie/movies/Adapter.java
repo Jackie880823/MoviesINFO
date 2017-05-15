@@ -81,11 +81,10 @@ public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
         return new Holder(view);
     }
 
-    protected static class Holder extends ViewHolder<MovieDetail> implements View.OnClickListener{
+    protected static class Holder extends ViewHolder<MovieDetail> {
         private static final String TAG = "Holder";
 
         private ImageView imgMovie;
-        private MovieDetail mDetail;
 
         public Holder(View itemView) {
             super(itemView);
@@ -93,8 +92,9 @@ public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
             imgMovie.setOnClickListener(this);
         }
 
+        @Override
         public void bindEntity(MovieDetail detail) {
-            mDetail = detail;
+            super.bindEntity(detail);
             String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
             ImageLoadUtil.loadPosterImage(itemView.getContext(), url, imgMovie);
         }
@@ -115,7 +115,7 @@ public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
         private void startDetailActivity(View view) {
             Activity context = (Activity) view.getContext();
             Intent intent = new Intent(context, DetailActivity.class);
-            intent.putExtra(Constants.EXTRA_MOVIE, mDetail);
+            intent.putExtra(Constants.EXTRA_MOVIE, entity);
             ActivityOptionsCompat optionsCompat = ActivityOptionsCompat
                     .makeSceneTransitionAnimation(context, view, Constants.TRANSIT_PIC);
             ActivityCompat.startActivity(context, intent, optionsCompat.toBundle());

@@ -46,6 +46,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
@@ -60,8 +63,11 @@ import com.google.gson.GsonBuilder;
 import com.jackie.movies.Constants;
 import com.jackie.movies.R;
 import com.jackie.movies.base.BaseActivity;
+import com.jackie.movies.base.BaseRecyclerAdapter;
 import com.jackie.movies.data.MovieContract;
 import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.Reviews;
+import com.jackie.movies.entities.Trailer;
 import com.jackie.movies.entities.Videos;
 import com.jackie.movies.tools.HttpUtils;
 import com.jackie.movies.tools.ImageLoadUtil;
@@ -71,6 +77,12 @@ import java.util.Locale;
 
 public class DetailActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = "DetailActivity";
+
+    private static final int WHAT_IS_LOAD_TRAILER = 100;
+
+    private static final int WHAT_IS_LOAD_REVIEWS = 200;
+    public static final String EXTRA_ENTITY = "extra_entity";
+
     /**
      * 电影详情
      */
@@ -113,6 +125,39 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private RecyclerView recReviews;
     private FloatingActionButton fabFavour;
 
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
+
+            switch (msg.what) {
+                case WHAT_IS_LOAD_TRAILER:
+                    Videos videos = msg.getData().getParcelable(EXTRA_ENTITY);
+                    if (videos != null) {
+                        BaseRecyclerAdapter<Trailer> adapter = new VideoAdapter(DetailActivity
+                                .this, videos.getResults());
+                        recVideos.setAdapter(adapter);
+                    } else {
+                        recVideos.setAdapter(null);
+                    }
+                    break;
+
+                case WHAT_IS_LOAD_REVIEWS:
+                    Reviews reviews = msg.getData().getParcelable(EXTRA_ENTITY);
+                    if (reviews != null) {
+                        BaseRecyclerAdapter adapter = new ReviewAdapter(DetailActivity.this,
+                                reviews.getResults());
+                        recReviews.setAdapter(adapter);
+                    } else {
+                        recReviews.setAdapter(null);
+                    }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,13 +168,21 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         initData();
         initView();
 
-        String videosUri = String.format(Constants.GET_VIDEOS, detail.getId());
 
-        Uri.Builder builder = Uri.parse(videosUri).buildUpon();
+        String videosUrl = String.format(Constants.GET_VIDEOS, detail.getId());
+        loadList(videosUrl, WHAT_IS_LOAD_TRAILER, Videos.class);
+
+        String reviewsUrl = String.format(Constants.GET_REVIEWS, detail.getId());
+        loadList(reviewsUrl, WHAT_IS_LOAD_REVIEWS, Reviews.class);
+    }
+
+    private void loadList(String url, final int what, final Class<? extends Parcelable> classOfT) {
+
+        Uri.Builder builder = Uri.parse(url).buildUpon();
         builder.appendQueryParameter(Constants.API_KEY_PARAM, getString(R.string.api_key_v3_auth));
         builder.appendQueryParameter(Constants.LANGUAGE_PARAM, Locale.getDefault().getLanguage());
-        videosUri = builder.build().toString();
-        HttpUtils.get(this, videosUri, new HttpUtils.HttpCallBack() {
+        url = builder.build().toString();
+        HttpUtils.get(this, url, new HttpUtils.HttpCallBack() {
             @Override
             public void onConnect() {
                 Log.d(TAG, "onConnect: ");
@@ -144,7 +197,14 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
             public void onSuccess(String response) {
                 Log.d(TAG, "onSuccess() called with: response = [" + response + "]");
                 Gson gson = new GsonBuilder().create();
-                Videos videos = gson.fromJson(response, Videos.class);
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(EXTRA_ENTITY, gson.fromJson(response, classOfT));
+
+                Message message = new Message();
+                message.what = what;
+                message.setData(bundle);
+                handler.sendMessage(message);
             }
 
             @Override
@@ -163,8 +223,11 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         tvReleaseDate = getViewById(R.id.tv_release_date);
         tvPopularity = getViewById(R.id.tv_popularity);
         tvVoteCount = getViewById(R.id.tv_vote_count);
+
         recVideos = getViewById(R.id.rec_videos);
+
         recReviews = getViewById(R.id.rec_reviews);
+
         ViewCompat.setTransitionName(imgPoster, Constants.TRANSIT_PIC);
     }
 

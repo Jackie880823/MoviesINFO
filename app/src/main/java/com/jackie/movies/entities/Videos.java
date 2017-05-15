@@ -45,6 +45,8 @@ package com.jackie.movies.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -114,9 +116,6 @@ public class Videos implements Parcelable {
 
     @Override
     public String toString() {
-        return "Videos{" +
-                "id=" + id +
-                ", results=[" + results +
-                "]}";
+        return "Videos" + new Gson().toJson(this);
     }
 }

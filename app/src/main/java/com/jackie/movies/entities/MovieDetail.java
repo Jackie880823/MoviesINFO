@@ -45,9 +45,10 @@ package com.jackie.movies.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created 16/11/24.
@@ -146,24 +147,21 @@ public class MovieDetail implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MovieDetail)) return false;
+
         MovieDetail that = (MovieDetail) o;
-        return getId() == that.getId() && Objects.equals(getGenre_ids(), that.getGenre_ids());
+
+        return getId() == that.getId();
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getGenre_ids());
+        return (int) (getId() ^ (getId() >>> 32));
     }
 
     @Override
     public String toString() {
-        return "MovieDetail{" + "poster_path='" + poster_path + '\'' + ", adult=" + adult + ", " +
-                "overview='" + overview + '\'' + ", release_date='" + release_date + '\'' + ", " +
-                "id=" + id + ", original_title='" + original_title + '\'' + ", " +
-                "original_language='" + original_language + '\'' + ", title='" + title + '\'' +
-                ", backdrop_path='" + backdrop_path + '\'' + ", popularity=" + popularity + ", " +
-                "vote_count=" + vote_count + ", video=" + video + ", vote_average=" +
-                vote_average + ", genre_ids=" + genre_ids + '}';
+        return "MovieDetail" + new Gson().toJson(this);
     }
 
     public MovieDetail() {}

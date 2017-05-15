@@ -45,7 +45,7 @@ package com.jackie.movies.entities;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Objects;
+import com.google.gson.Gson;
 
 /**
  * Created 17/1/13.
@@ -147,27 +147,20 @@ public class Trailer implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Trailer)) return false;
+
         Trailer trailer = (Trailer) o;
-        return Objects.equals(getId(), trailer.getId()) && Objects.equals(getKey(), trailer
-                .getKey());
+
+        return getId().equals(trailer.getId());
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getKey());
+        return getId().hashCode();
     }
 
     @Override
     public String toString() {
-        return "Trailer{" +
-                "id='" + id + '\'' +
-                ", iso_639_1='" + iso_639_1 + '\'' +
-                ", iso_3166_1='" + iso_3166_1 + '\'' +
-                ", key='" + key + '\'' +
-                ", name='" + name + '\'' +
-                ", site='" + site + '\'' +
-                ", size=" + size +
-                ", type='" + type + '\'' +
-                '}';
+        return "Trailer" + new Gson().toJson(this);
     }
 }

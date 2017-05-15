@@ -90,4 +90,6 @@ public class Constants {
 
     public static final String TRANSIT_PIC = "picture";
 
+    public static final String LINK_TO_YOUTUBE = "https://www.youtube.com/watch?v=%s";
+    public static final String YOUTUBE_PACKAGE_NAME = "com.google.android.youtube";
 }
