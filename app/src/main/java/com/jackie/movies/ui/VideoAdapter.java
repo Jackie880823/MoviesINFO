@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -56,6 +57,7 @@ import com.jackie.movies.R;
 import com.jackie.movies.base.BaseRecyclerAdapter;
 import com.jackie.movies.base.ViewHolder;
 import com.jackie.movies.entities.Trailer;
+import com.jackie.movies.tools.ImageLoadUtil;
 
 import java.util.List;
 import java.util.Locale;
@@ -74,24 +76,35 @@ public class VideoAdapter extends BaseRecyclerAdapter<Trailer> {
 
     @Override
     public ViewHolder<Trailer> onCreateViewHolder(ViewGroup parent, int viewType) {
-        ImageView imageView = new ImageView(mContext);
-        return new TrailerHolder(imageView);
+        View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_movie, parent, false);
+        return new TrailerHolder(itemView);
     }
 
-    private static class TrailerHolder extends ViewHolder<Trailer> implements View.OnClickListener{
+    private static class TrailerHolder extends ViewHolder<Trailer> implements View.OnClickListener {
         private ImageView imageView;
-        public TrailerHolder(ImageView itemView) {
+
+        public TrailerHolder(View itemView) {
             super(itemView);
-            this.imageView = itemView;
+            this.imageView = (ImageView) itemView.findViewById(R.id.img_movie);
             this.imageView.setImageResource(R.drawable.image_default);
             this.imageView.setOnClickListener(this);
         }
 
         @Override
+        public void bindEntity(Trailer entity) {
+            super.bindEntity(entity);
+            String img = String.format(Locale.US, "https://img.youtube.com/vi/%s/hqdefault.jpg",
+                    entity.getKey());
+            ImageLoadUtil.loadPosterImage(itemView.getContext(), img, imageView);
+        }
+
+        @Override
         public void onClick(View v) {
-            String id = entity.getId();
-            String youtubeLink = String.format(Locale.US, Constants.LINK_TO_YOUTUBE, id);
+
+            String key = entity.getKey();
+            String youtubeLink = String.format(Locale.US, Constants.LINK_TO_YOUTUBE, key);
             Intent youtubeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(youtubeLink));
+
 
             PackageManager packageManager = imageView.getContext().getPackageManager();
             for (ResolveInfo resolveInfo : packageManager.queryIntentActivities(youtubeIntent, 0)) {
