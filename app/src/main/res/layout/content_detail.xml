@@ -117,6 +117,26 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1.0"
                             android:padding="@dimen/small_padding"
+                            android:text="@string/film_duration"/>
+
+                        <TextView
+                            android:id="@+id/tv_duration"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.0"
+                            android:padding="@dimen/small_padding"/>
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.0">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.0"
+                            android:padding="@dimen/small_padding"
                             android:text="@string/film_release_date"/>
 
                         <TextView

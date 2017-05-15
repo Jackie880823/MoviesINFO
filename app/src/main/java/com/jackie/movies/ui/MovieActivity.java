@@ -65,7 +65,7 @@ import com.jackie.movies.UpdateMoviesTask;
 import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.data.MovieContract.Movie;
 import com.jackie.movies.data.MovieContract.Page;
-import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.entities.MovieEntity;
 import com.malinskiy.superrecyclerview.OnMoreListener;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
@@ -261,7 +261,7 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
         }
 
         entity = new MovieEntity();
-        List<MovieDetail> details = new LinkedList<>();
+        List<MovieItem> details = new LinkedList<>();
         final int columnTotalResults = data.getColumnIndex(Page.TOTAL_RESULTS);
         final int columnPosterPath = data.getColumnIndex(Movie.POSTER_PATH);
         final int columnAdult = data.getColumnIndex(Movie.ADULT);
@@ -291,7 +291,7 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
                 entity.setTotal_pages(data.getInt(columnTotalPages));
                 entity.setTotal_results(data.getInt(columnTotalResults));
             }
-            MovieDetail detail = new MovieDetail();
+            MovieItem detail = new MovieItem();
             //        String poster_path;
             detail.setPoster_path(data.getString(columnPosterPath));
             //        boolean adult;

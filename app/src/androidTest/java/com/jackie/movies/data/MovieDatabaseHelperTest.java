@@ -50,7 +50,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jackie.movies.R;
-import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.entities.MovieEntity;
 
 import java.util.List;
@@ -100,7 +100,7 @@ public class MovieDatabaseHelperTest extends AndroidTestCase {
         long pageId = db.insert(MovieContract.Page.TABLE_NAME, null, pageValues);
         assertTrue("not insert page to database", pageId > -1);
 
-        for (MovieDetail detail : entity.getResults()) {
+        for (MovieItem detail : entity.getResults()) {
             List<Integer> genre_ids = detail.getGenre_ids();
             StringBuilder builder = new StringBuilder();
             for (Integer genre_id : genre_ids) {

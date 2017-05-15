@@ -61,7 +61,7 @@ public class MovieEntity implements Parcelable {
     private int page = -1;
     private int total_results = -1;
     private int total_pages = -1;
-    private List<MovieDetail> results;
+    private List<MovieItem> results;
 
     public int getPage() { return page;}
 
@@ -75,9 +75,9 @@ public class MovieEntity implements Parcelable {
 
     public void setTotal_pages(int total_pages) { this.total_pages = total_pages;}
 
-    public List<MovieDetail> getResults() { return results;}
+    public List<MovieItem> getResults() { return results;}
 
-    public void setResults(List<MovieDetail> results) { this.results = results;}
+    public void setResults(List<MovieItem> results) { this.results = results;}
 
     @Override
     public boolean equals(Object o) {
@@ -125,7 +125,7 @@ public class MovieEntity implements Parcelable {
         this.page = in.readInt();
         this.total_results = in.readInt();
         this.total_pages = in.readInt();
-        this.results = in.createTypedArrayList(MovieDetail.CREATOR);
+        this.results = in.createTypedArrayList(MovieItem.CREATOR);
     }
 
     public static final Parcelable.Creator<MovieEntity> CREATOR = new Parcelable

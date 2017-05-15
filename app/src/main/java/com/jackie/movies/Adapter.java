@@ -55,7 +55,7 @@ import android.widget.ImageView;
 
 import com.jackie.movies.base.BaseRecyclerAdapter;
 import com.jackie.movies.base.ViewHolder;
-import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.tools.ImageLoadUtil;
 import com.jackie.movies.ui.DetailActivity;
 
@@ -68,20 +68,20 @@ import java.util.List;
  * @version 1.0
  */
 
-public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
+public class Adapter extends BaseRecyclerAdapter<MovieItem> {
 
 
-    public Adapter(Context context, List<MovieDetail> data) {
+    public Adapter(Context context, List<MovieItem> data) {
         super(context, data);
     }
 
     @Override
-    public ViewHolder<MovieDetail> onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder<MovieItem> onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_movie, parent, false);
         return new Holder(view);
     }
 
-    protected static class Holder extends ViewHolder<MovieDetail> {
+    protected static class Holder extends ViewHolder<MovieItem> {
         private static final String TAG = "Holder";
 
         private ImageView imgMovie;
@@ -93,7 +93,7 @@ public class Adapter extends BaseRecyclerAdapter<MovieDetail> {
         }
 
         @Override
-        public void bindEntity(MovieDetail detail) {
+        public void bindEntity(MovieItem detail) {
             super.bindEntity(detail);
             String url = Constants.MEDIUM_IMAGE + detail.getPoster_path();
             ImageLoadUtil.loadPosterImage(itemView.getContext(), url, imgMovie);

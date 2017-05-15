@@ -66,6 +66,7 @@ import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.base.BaseRecyclerAdapter;
 import com.jackie.movies.data.MovieContract;
 import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.entities.Reviews;
 import com.jackie.movies.entities.Trailer;
 import com.jackie.movies.entities.Videos;
@@ -78,15 +79,16 @@ import java.util.Locale;
 public class DetailActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = "DetailActivity";
 
-    private static final int WHAT_IS_LOAD_TRAILER = 100;
+    private static final int WHAT_IS_LOAD_DETAILS = 100;
+    private static final int WHAT_IS_LOAD_TRAILER = 200;
+    private static final int WHAT_IS_LOAD_REVIEWS = 300;
 
-    private static final int WHAT_IS_LOAD_REVIEWS = 200;
     public static final String EXTRA_ENTITY = "extra_entity";
 
     /**
      * 电影详情
      */
-    private MovieDetail detail;
+    private MovieItem detail;
     /**
      * 简介
      */
@@ -120,6 +122,11 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
      */
     private TextView tvVoteCount;
 
+    /**
+     * 影片时长
+     */
+    private TextView tvDuration;
+
     private RecyclerView recVideos;
 
     private RecyclerView recReviews;
@@ -134,6 +141,15 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
             }
 
             switch (msg.what) {
+                case WHAT_IS_LOAD_DETAILS:
+                    MovieDetail detail = msg.getData().getParcelable(EXTRA_ENTITY);
+                    if (detail != null) {
+                        tvDuration.setText(getString(R.string.movie_duration, detail.getRuntime()));
+                    } else {
+                        tvDuration.setText(getString(R.string.movie_duration, 0));
+                    }
+                    break;
+
                 case WHAT_IS_LOAD_TRAILER:
                     Videos videos = msg.getData().getParcelable(EXTRA_ENTITY);
                     if (videos != null) {
@@ -168,12 +184,14 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         initData();
         initView();
 
+        long id = detail.getId();
+        String detailUrl    = String.format(Constants.GET_DETAILS,  id);
+        String videosUrl    = String.format(Constants.GET_VIDEOS,   id);
+        String reviewsUrl   = String.format(Constants.GET_REVIEWS,  id);
 
-        String videosUrl = String.format(Constants.GET_VIDEOS, detail.getId());
-        loadList(videosUrl, WHAT_IS_LOAD_TRAILER, Videos.class);
-
-        String reviewsUrl = String.format(Constants.GET_REVIEWS, detail.getId());
-        loadList(reviewsUrl, WHAT_IS_LOAD_REVIEWS, Reviews.class);
+        loadList(detailUrl,     WHAT_IS_LOAD_DETAILS, MovieDetail.class);
+        loadList(videosUrl,     WHAT_IS_LOAD_TRAILER, Videos.class);
+        loadList(reviewsUrl,    WHAT_IS_LOAD_REVIEWS, Reviews.class);
     }
 
     private void loadList(String url, final int what, final Class<? extends Parcelable> classOfT) {
@@ -215,18 +233,17 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void initView() {
-        tvDescription = getViewById(R.id.tv_description);
-        tvVoteAverage = getViewById(R.id.tv_vote_average);
-        imgBackdrop = getViewById(R.id.img_backdrop);
-        imgPoster = getViewById(R.id.img_poster);
-        tvTitleName = getViewById(R.id.tv_title_name);
-        tvReleaseDate = getViewById(R.id.tv_release_date);
-        tvPopularity = getViewById(R.id.tv_popularity);
-        tvVoteCount = getViewById(R.id.tv_vote_count);
-
-        recVideos = getViewById(R.id.rec_videos);
-
-        recReviews = getViewById(R.id.rec_reviews);
+        tvDescription   = getViewById(R.id.tv_description);
+        tvVoteAverage   = getViewById(R.id.tv_vote_average);
+        imgBackdrop     = getViewById(R.id.img_backdrop);
+        imgPoster       = getViewById(R.id.img_poster);
+        tvTitleName     = getViewById(R.id.tv_title_name);
+        tvReleaseDate   = getViewById(R.id.tv_release_date);
+        tvPopularity    = getViewById(R.id.tv_popularity);
+        tvVoteCount     = getViewById(R.id.tv_vote_count);
+        tvDuration      = getViewById(R.id.tv_duration);
+        recVideos       = getViewById(R.id.rec_videos);
+        recReviews      = getViewById(R.id.rec_reviews);
 
         ViewCompat.setTransitionName(imgPoster, Constants.TRANSIT_PIC);
     }

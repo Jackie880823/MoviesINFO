@@ -53,7 +53,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jackie.movies.data.MovieContract;
 import com.jackie.movies.data.MovieProvider;
-import com.jackie.movies.entities.MovieDetail;
+import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.entities.MovieEntity;
 import com.jackie.movies.tools.HttpUtils;
 
@@ -156,7 +156,7 @@ public class UpdateMoviesTask extends AsyncTask<String, Integer, Void>  {
         contentResolver.insert(MovieContract.Page.CONTENT_URI, pageValues);
 
         Vector<ContentValues> valuesVector = new Vector<>();
-        for (MovieDetail detail : entity.getResults()) {
+        for (MovieItem detail : entity.getResults()) {
 
             List<Integer> genre_ids = detail.getGenre_ids();
 
