@@ -65,8 +65,8 @@ import com.jackie.movies.UpdateMoviesTask;
 import com.jackie.movies.base.BaseActivity;
 import com.jackie.movies.data.MovieContract.Movie;
 import com.jackie.movies.data.MovieContract.Page;
-import com.jackie.movies.entities.MovieItem;
 import com.jackie.movies.entities.MovieEntity;
+import com.jackie.movies.entities.MovieItem;
 import com.malinskiy.superrecyclerview.OnMoreListener;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
@@ -76,14 +76,19 @@ import java.util.List;
 public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener,
         OnMoreListener, LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "MovieActivity";
-    public static final String PREF_IS_POPULAR_KEY  = "pref_is_popular_key";
 
     private static final int MOVIE_LOADER_ID        = 0x3e8;
     private static final int MOVIE_FAVORITE_ID      = 0x3e9;
 
+    private static final String PREF_IS_POPULAR_KEY = "pref_is_popular_key";
+
+    private static final String EXTRA_IS_POPULAR    = PREF_IS_POPULAR_KEY;
+    private static final String EXTRA_IS_FAVOUR     = "extra_favour";
+    private static final String EXTRA_ENTITY        = "extra_entity";
+
     private MenuItem menuForType;
-    private boolean isPopular   = true;
-    private boolean isFavorite  = false;
+    private boolean mIsPopular = true;
+    private boolean mIsFavourite = false;
     private int currentPage = 1;
     private SuperRecyclerView recyclerView;
     private Adapter mAdapter;
@@ -96,7 +101,6 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
         super.onCreate(savedInstanceState);
 
         loaderManager = getLoaderManager();
-        loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
 
         recyclerView = getViewById(R.id.rec_view);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -111,10 +115,26 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
         recyclerView.setRefreshing(true);
         recyclerView.setupMoreListener(this, 1);
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        isPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+        if (savedInstanceState == null) {
+            preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mIsPopular = preferences.getBoolean(PREF_IS_POPULAR_KEY, false);
+            updateMovies();
+        } else {
+            mIsFavourite    = savedInstanceState.getBoolean(EXTRA_IS_FAVOUR, false);
+            mIsPopular      = savedInstanceState.getBoolean(EXTRA_IS_POPULAR, false);
+            entity          = savedInstanceState.getParcelable(EXTRA_ENTITY);
+            mAdapter        = new Adapter(this, entity.getResults());
 
-        updateMovies();
+            recyclerView.setAdapter(mAdapter);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_IS_FAVOUR, mIsFavourite);
+        outState.putBoolean(EXTRA_IS_POPULAR, mIsPopular);
+        outState.putParcelable(EXTRA_ENTITY, entity);
     }
 
     @Override
@@ -126,11 +146,14 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
 
     private void updateMovies() {
         Log.d(TAG, "updateMovies() called");
-
-        String[] param = new String[]{String.valueOf(isPopular), String.valueOf(currentPage)};
-        UpdateMoviesTask task = new UpdateMoviesTask(this);
-        task.execute(param);
-        loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+        if (mIsFavourite) {
+            loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
+        } else {
+            String[] param = new String[]{String.valueOf(mIsPopular), String.valueOf(currentPage)};
+            UpdateMoviesTask task = new UpdateMoviesTask(this);
+            task.execute(param);
+            loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+        }
     }
 
     @Override
@@ -139,7 +162,7 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         menuForType = menu.findItem(R.id.action_type);
-        setMenuTitle(isPopular);
+        setMenuTitle(mIsPopular, mIsFavourite);
         return true;
     }
 
@@ -152,38 +175,37 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
 
         switch (id) {
             case R.id.action_refresh:
-                if (isFavorite) {
-                    loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
-                } else {
-                    updateMovies();
-                }
+                updateMovies();
                 break;
 
             case R.id.action_type:
-                isPopular = !isPopular;
-                isFavorite = false;
+                mIsPopular = !mIsPopular;
+                mIsFavourite = false;
 
-                setMenuTitle(isPopular);
+                setMenuTitle(mIsPopular, mIsFavourite);
 
                 currentPage = 1;
                 recyclerView.setupMoreListener(this, 1);
 
-                preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, isPopular).apply();
+                preferences.edit().putBoolean(PREF_IS_POPULAR_KEY, mIsPopular).apply();
 
                 updateMovies();
                 break;
 
             case R.id.action_favorite:
 
-                isFavorite = true;
-                setMenuTitle(isPopular);
-                loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
+                if (!mIsFavourite) {
+                    mIsFavourite = true;
+                    mAdapter.setData(null);
+                    setMenuTitle(mIsPopular, mIsFavourite);
+                    loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void setMenuTitle(boolean isPopular) {
+    private void setMenuTitle(boolean isPopular, boolean isFavorite) {
         if (isFavorite) {
             setTitle(getString(R.string.title_favorite_movies));
         } else if (isPopular) {
@@ -236,7 +258,7 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
                 select = Movie.FAVOUR + " = 1";
                 break;
             case MOVIE_LOADER_ID:
-                String path = isPopular ? Movie.PATH_POPULAR : Movie.PATH_TOP_RATED;
+                String path = mIsPopular ? Movie.PATH_POPULAR : Movie.PATH_TOP_RATED;
                 uri = Movie.CONTENT_URI.buildUpon().appendPath(path).appendPath(String.valueOf
                         (currentPage)).build();
                 select = null;
@@ -348,7 +370,7 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
      */
     @Override
     public void onRefresh() {
-        if (isFavorite) {
+        if (mIsFavourite) {
             loaderManager.restartLoader(MOVIE_FAVORITE_ID, null, this);
         } else {
             currentPage = 1;
@@ -374,6 +396,11 @@ public class MovieActivity extends BaseActivity implements SwipeRefreshLayout.On
             recyclerView.setLoadingMore(false);
             return;
         }
-        updateMovies();
+
+        if (!mIsFavourite) {
+            updateMovies();
+        } else {
+            recyclerView.setLoadingMore(false);
+        }
     }
 }
