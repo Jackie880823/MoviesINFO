@@ -82,8 +82,10 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private static final int WHAT_IS_LOAD_DETAILS = 100;
     private static final int WHAT_IS_LOAD_TRAILER = 200;
     private static final int WHAT_IS_LOAD_REVIEWS = 300;
+    private static final int WHAT_IS_CHECK_FAVOUR = 400;
 
-    public static final String EXTRA_ENTITY = "extra_entity";
+    private static final String EXTRA_ENTITY = "extra_entity";
+    private static final String EXTRA_FAVOUR = "extra_favour";
 
     /**
      * 电影详情
@@ -142,9 +144,10 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
 
             switch (msg.what) {
                 case WHAT_IS_LOAD_DETAILS:
-                    MovieDetail detail = msg.getData().getParcelable(EXTRA_ENTITY);
-                    if (detail != null) {
-                        tvDuration.setText(getString(R.string.movie_duration, detail.getRuntime()));
+                    MovieDetail entity = msg.getData().getParcelable(EXTRA_ENTITY);
+                    if (entity != null) {
+                        tvDuration.setText(getString(R.string.movie_duration, entity.getRuntime
+                                ()));
                     } else {
                         tvDuration.setText(getString(R.string.movie_duration, 0));
                     }
@@ -170,6 +173,17 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
                     } else {
                         recReviews.setAdapter(null);
                     }
+                    break;
+
+                case WHAT_IS_CHECK_FAVOUR:
+                    if (null != detail) {
+                        synchronized (TAG) {
+                            boolean isFavour = msg.getData().getBoolean(EXTRA_FAVOUR, detail.isFavour());
+                            detail.setFavour(isFavour);
+                            checkFavour(isFavour);
+                        }
+                    }
+                    break;
             }
         }
     };
@@ -312,17 +326,27 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void updateMark() {
-        ContentValues values = new ContentValues();
-        boolean favour = detail.isFavour();
-        values.put(MovieContract.Movie.FAVOUR, !favour);
-        Uri uri = MovieContract.Movie.buildMovieUri(detail.getId());
-        ContentResolver contentResolver = getContentResolver();
-        int update = contentResolver.update(uri, values, null, null);
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                synchronized (TAG) {
+                    ContentValues values = new ContentValues();
+                    boolean favour = detail.isFavour();
+                    values.put(MovieContract.Movie.FAVOUR, !favour);
+                    Uri uri = MovieContract.Movie.buildMovieUri(detail.getId());
+                    ContentResolver contentResolver = getContentResolver();
+                    int update = contentResolver.update(uri, values, null, null);
 
-        if (update == 1) {
-            detail.setFavour(!favour);
-            checkFavour(!favour);
-        }
+                    if (update == 1) {
+                        Message message = new Message();
+                        message.what = WHAT_IS_CHECK_FAVOUR;
+                        message.getData().putBoolean(EXTRA_FAVOUR, !favour);
+                        handler.sendMessage(message);
+                    }
+                }
+            }
+        }.start();
     }
 
     private void checkFavour(boolean favour) {
